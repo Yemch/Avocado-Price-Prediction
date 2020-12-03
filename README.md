@@ -1,2 +1,2 @@
 # demo
-i am writing the readme
+Authors: Chuanjie Deng, Mingchen Ye, Nazleen Khan
