@@ -1,0 +1,133 @@
+---
+title: "bst260_final"
+output: html_document
+---
+
+```{r}
+library(tidyverse)
+library(readxl)
+library(purrr)
+```
+
+# 1. Avocado Prices Data Cleaning
+Historical data on avocado prices and sales volume in multiple US markets.
+This data contains the outcome - the average price of a single avocado. The prices are summerised at city-level.
+Source: https://www.kaggle.com/neuromusic/avocado-prices
+
+Some relevant columns in the dataset:
+
+Date - The date of the observation
+AveragePrice - the average price of a single avocado
+type - conventional or organic
+year - the year
+Region - the city or region of the observation
+Total Volume - Total number of avocados sold
+4046 - Total number of avocados with PLU 4046 sold
+4225 - Total number of avocados with PLU 4225 sold
+4770 - Total number of avocados with PLU 4770 sold
+
+```{r}
+avocado = read.csv("./avocado.csv") # avocado price data
+city2county = read_xlsx("./Cities-Counties-States.xlsx") # city to county mapping data
+head(avocado)
+```
+
+```{r}
+summary(avocado)
+```
+
+Keep data with regions at city-level. For regions of combination of two cities such as "BaltimoreWashington", we exclude if two cities have distance greater than 30 miles, because we assume that cities with equal or closer distance of 30 miles have the same avocado prices.
+```{r}
+# Check all the combined cities left
+city2county %>% 
+  filter(Include == 1) %>%
+  filter(!is.na(County2)) 
+
+# Make a new dataset with separate cities
+com = data.frame(Location = c("Hartford","Springfield","Miami","Fort Lauderdale"),
+                 County1= c("HARTFORD","HAMPDEN","MIAMI-DADE","BROWARD"),
+                 County2= NA,
+                 Distance = NA,
+                 State = c("CONNECTICUT","MASSACHUSETTS","FLORIDA","FLORIDA"))
+com
+
+# Drop not useful regions broader than city level (set Include == 1)
+# Remove the rows with combination cities
+# Add cities back separately
+# remove unuseful columns
+city2county = city2county %>%
+  filter(Include == 1) %>%
+  filter(Location != "HartfordSpringfield") %>%
+  filter(Location != "MiamiFtLauderdale") %>%
+  bind_rows(com) %>%
+  dplyr::select(-County2,-Distance)
+
+# Combine price dataset and county data together
+avocado = avocado %>% 
+  left_join(city2county, by = c("region" = "Location")) %>%
+  filter(Include == 1) %>%
+  dplyr::select(-X,-Include) # remove the first column
+```
+
+# 2. Food Environment Atlas Data Cleaning
+
+These data are the potential predictors we will be used to predict avocado prices.
+
+Read food environment atlas data. 
+```{r}
+county = read_xlsx("./County.xlsx")
+state = read_xlsx("./State.xlsx")
+access = read_xlsx("./Access.xlsx")
+stores = read_xlsx("./Stores.xlsx")
+restaurants = read_xlsx("./Restaurants.xlsx")
+assistance = read_xlsx("./Assistance.xlsx")
+insecurity = read_xlsx("./Insecurity.xlsx")
+taxes = read_xlsx("./Taxes.xlsx")
+local = read_xlsx("./Local.xlsx")
+health = read_xlsx("./Health.xlsx")
+socioecon = read_xlsx("./SocioEconomic.xlsx")
+
+# remove the last row in local dataset, which is an NA row 
+local = local[1:nrow(local)-1,]
+```
+
+Merge all food environment atlas data together except for state population
+```{r}
+# Combine food environment atlas covariates together (county-level)
+foodatlas = 
+  # Place all tables at county-level into a list
+  list(county, access, stores, restaurants, assistance, insecurity, taxes, local, health, socioecon) %>% 
+  # Use reduce to join together the contents of the list
+  reduce(left_join, by = "FIPS")
+
+# Uncomment this line to check number of NA in each column
+# apply(foodatlas, 2, function(x){sum(is.na(x))})
+
+# remove duplicate columns
+foodatlas = foodatlas %>% 
+  dplyr::select(-State.x.x, -State.x.x.x, -State.x.x.x.x, -State.x.x.x.x.x, -State.y, -State.y.y, -State.y.y.y, -State.y.y.y.y, -State.y.y.y.y.y,
+                -County.x.x, -County.x.x.x, -County.x.x.x.x, -County.x.x.x.x.x, -County.x, -County.y.y, -County.y.y.y, -County.y.y.y.y, -County.y.y.y.y.y)
+```
+
+# 3. Merge two parts together
+```{r}
+# Capitalize all the Counties and States in food environment atlas data
+foodatlas$State.x = toupper(foodatlas$State.x)
+foodatlas$County.y = toupper(foodatlas$County.y)
+
+avocado = avocado %>%
+  left_join(foodatlas, by = c("County1" = "County.y", "State" = "State.x"))
+
+avocado = rename(avocado, County = County1)
+dim(avocado)
+```
+
+```{r}
+write.csv(avocado,"./avocado_clean.csv", row.names = F)
+```
+
+
+
+
+
+
