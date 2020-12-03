@@ -1,5 +1,5 @@
 ---
-title: "bst260_final"
+title: "Data Wrangling"
 output: html_document
 ---
 
@@ -75,17 +75,17 @@ These data are the potential predictors we will be used to predict avocado price
 
 Read food environment atlas data. 
 ```{r}
-county = read_xlsx("./County.xlsx")
-state = read_xlsx("./State.xlsx")
-access = read_xlsx("./Access.xlsx")
-stores = read_xlsx("./Stores.xlsx")
-restaurants = read_xlsx("./Restaurants.xlsx")
-assistance = read_xlsx("./Assistance.xlsx")
-insecurity = read_xlsx("./Insecurity.xlsx")
-taxes = read_xlsx("./Taxes.xlsx")
-local = read_xlsx("./Local.xlsx")
-health = read_xlsx("./Health.xlsx")
-socioecon = read_xlsx("./SocioEconomic.xlsx")
+county = read_xlsx("./FoodAtlasData/County.xlsx")
+state = read_xlsx("./FoodAtlasData/State.xlsx")
+access = read_xlsx("./FoodAtlasData/Access.xlsx")
+stores = read_xlsx("./FoodAtlasData/Stores.xlsx")
+restaurants = read_xlsx("./FoodAtlasData/Restaurants.xlsx")
+assistance = read_xlsx("./FoodAtlasData/Assistance.xlsx")
+insecurity = read_xlsx("./FoodAtlasData/Insecurity.xlsx")
+taxes = read_xlsx("./FoodAtlasData/Taxes.xlsx")
+local = read_xlsx("./FoodAtlasData/Local.xlsx")
+health = read_xlsx("./FoodAtlasData/Health.xlsx")
+socioecon = read_xlsx("./FoodAtlasData/SocioEconomic.xlsx")
 
 # remove the last row in local dataset, which is an NA row 
 local = local[1:nrow(local)-1,]
