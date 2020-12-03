@@ -4,7 +4,7 @@ Authors: Group 6 - Chuanjie Deng, Mingchen Ye, Nazleen Khan
 
 ### Data
 - Avocado prices dataset: `avocado.csv` downloaded from https://www.kaggle.com/neuromusic/avocado-prices
-- Food Environment Atlas datasets are in the `FoodAtlasData` folder, downloaded from https://www.kaggle.com/neuromusic/avocado-prices
+- Food Environment Atlas datasets are in the `FoodAtlasData` folder, downloaded from https://www.ers.usda.gov/data-products/food-environment-atlas/data-access-and-documentation-downloads/
 - City to county mapping data: `Cities-Counties-States.xlsx`
 
 ### RMarkdown and HTML files 
