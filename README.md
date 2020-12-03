@@ -10,4 +10,4 @@ Authors: Group 6 - Chuanjie Deng, Mingchen Ye, Nazleen Khan
 ### RMarkdown and HTML files 
 1. `DataWrangling.Rmd` and `DataWrangling.html` is for data wrangling process. 
 
-We first cleaned the avocavado prices data with unclear region descriptions and restricted the data only at city level. Since avocado prices data is mainly at city level and the Food Environment Atlas dataset are at county level, we created a new dataset mannualy for linking the cities to counties. After that, we merged prices data and food environment data together by the same county in the same state. Finally, a cleaned version of data is outputed as `avocado_clean.csv`.
+We first cleaned the `avocado.csv` with unclear region descriptions and restricted the data only at city level. Since avocado prices data is mainly at city level and the Food Environment Atlas datasets are at county level, we created a new dataset `Cities-Counties-States.xlsx` mannualy for linking the cities to counties. After that, we merged prices data and food environment data together by the same county in the same state. Finally, a cleaned version of data is outputed as `avocado_clean.csv`.
