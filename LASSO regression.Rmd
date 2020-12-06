@@ -7,8 +7,6 @@ output: html_document
 
 ```{r}
 library(tidyverse)
-install.packages("gamlr")
-install.packages("Matrix")
 library(gamlr)
 library(Matrix)
 library(lubridate)
@@ -23,8 +21,6 @@ train <- avocado_clean %>%
          filter(State == "CALIFORNIA" & year == 2016) # Train prediction model using 2016 observations
 test <- avocado_clean %>%
         filter(State == "CALIFORNIA" & year == 2017) # Test prediction model using 2017 observations
-test_US <- avocado_clean %>%
-           filter(State != "CALIFORNIA" & year == 2016) # Test prediction model using US 2016 observations
 ```
 
 ## Assessing descriptive statistics
@@ -53,25 +49,6 @@ test <- test %>%
                    "FRESHVEG_ACRESPTH07", "PCH_FRESHVEG_ACRES_07_12",
                    "PCH_FRESHVEG_ACRESPTH_07_12", "FOODHUB18"))
 sum(is.na(test)) # No missing values in testing dataset
-
-## TESTING US DATASET ##
-test_US <- test_US %>%
-        select(-c("PCH_DIRSALES_FARMS_07_12", "PCT_LOCLSALE12", 
-                   "DIRSALES12", "PCH_DIRSALES_07_12",
-                   "PC_DIRSALES12", "PCH_PC_DIRSALES_07_12",
-                   "PCH_VEG_FARMS_07_12", "PCH_VEG_ACRES_07_12",
-                   "PCH_VEG_ACRESPTH_07_12", "PCH_FRESHVEG_FARMS_07_12",
-                   "PCH_ORCHARD_FARMS_07_12", "ORCHARD_ACRES12",
-                   "PCH_ORCHARD_ACRES_07_12", "ORCHARD_ACRESPTH12",
-                   "PCH_ORCHARD_ACRESPTH_07_12", "PCH_BERRY_FARMS_07_12",
-                   "PCH_BERRY_ACRES_07_12", "PCH_BERRY_ACRESPTH_07_12",
-                   "PCH_GHVEG_FARMS_07_12", "PCH_GHVEG_SQFT_07_12",
-                   "PCH_GHVEG_SQFTPTH_07_12", "PCH_CSA_07_12",
-                   "PCH_AGRITRSM_OPS_07_12", "AGRITRSM_RCT07",
-                   "PCH_AGRITRSM_RCT_07_12", "FRESHVEG_ACRES07",
-                   "FRESHVEG_ACRESPTH07", "PCH_FRESHVEG_ACRES_07_12",
-                   "PCH_FRESHVEG_ACRESPTH_07_12", "FOODHUB18"))
-sum(is.na(test_US)) # No missing values in testing dataset
 ```
 
 ## Prepping the datasets for LASSO regression
@@ -92,14 +69,6 @@ test[,c("type","County")] <-
 test <- test %>%
         select(-c("Date", "State", "year", "region", "FIPS"))
 xTest = model.matrix(~ .,  data = test %>%
-         dplyr::select(-AveragePrice))
-
-## TESTING US DATASET ##
-test_US[,c("type","County")] <-
-  lapply(test_US[,c("type", "County")], as.factor) # Convert multilevel character to factor variables
-test_US <- test_US %>%
-        select(-c("Date", "State", "year", "region", "FIPS"))
-xTest_US = model.matrix(~ .,  data = test_US %>%
          dplyr::select(-AveragePrice))
 ```
 
