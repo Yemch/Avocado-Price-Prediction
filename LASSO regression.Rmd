@@ -1,0 +1,124 @@
+---
+title: "LASSO regression"
+author: "Nazleen Khan"
+date: "12/5/2020"
+output: html_document
+---
+
+```{r}
+library(tidyverse)
+install.packages("gamlr")
+install.packages("Matrix")
+library(gamlr)
+library(Matrix)
+library(lubridate)
+```
+
+## Pulling in the wrangled data and creating the training and testing datasets
+
+```{r}
+avocado_clean <- read.csv("avocado_clean.csv") # 10,140 observations of 306 variables
+table(avocado_clean$State)
+train <- avocado_clean %>% 
+         filter(State == "CALIFORNIA" & year == 2016) # Train prediction model using 2016 observations
+test <- avocado_clean %>%
+        filter(State == "CALIFORNIA" & year == 2017) # Test prediction model using 2017 observations
+test_US <- avocado_clean %>%
+           filter(State != "CALIFORNIA" & year == 2016) # Test prediction model using US 2016 observations
+```
+
+## Assessing descriptive statistics
+
+```{r}
+## TRAINING DATASET ##
+sapply(train, function(x) sum(is.na(x))) # Number missing by column
+train.no.missing <- train[ , colSums(is.na(train)) == 0] # Exclude all columns with missing values
+sum(is.na(train.no.missing)) # No missing values in new training dataset
+
+## TESTING DATASET ##
+test <- test %>%
+        select(-c("PCH_DIRSALES_FARMS_07_12", "PCT_LOCLSALE12", 
+                   "DIRSALES12", "PCH_DIRSALES_07_12",
+                   "PC_DIRSALES12", "PCH_PC_DIRSALES_07_12",
+                   "PCH_VEG_FARMS_07_12", "PCH_VEG_ACRES_07_12",
+                   "PCH_VEG_ACRESPTH_07_12", "PCH_FRESHVEG_FARMS_07_12",
+                   "PCH_ORCHARD_FARMS_07_12", "ORCHARD_ACRES12",
+                   "PCH_ORCHARD_ACRES_07_12", "ORCHARD_ACRESPTH12",
+                   "PCH_ORCHARD_ACRESPTH_07_12", "PCH_BERRY_FARMS_07_12",
+                   "PCH_BERRY_ACRES_07_12", "PCH_BERRY_ACRESPTH_07_12",
+                   "PCH_GHVEG_FARMS_07_12", "PCH_GHVEG_SQFT_07_12",
+                   "PCH_GHVEG_SQFTPTH_07_12", "PCH_CSA_07_12",
+                   "PCH_AGRITRSM_OPS_07_12", "AGRITRSM_RCT07",
+                   "PCH_AGRITRSM_RCT_07_12", "FRESHVEG_ACRES07",
+                   "FRESHVEG_ACRESPTH07", "PCH_FRESHVEG_ACRES_07_12",
+                   "PCH_FRESHVEG_ACRESPTH_07_12", "FOODHUB18"))
+sum(is.na(test)) # No missing values in testing dataset
+
+## TESTING US DATASET ##
+test_US <- test_US %>%
+        select(-c("PCH_DIRSALES_FARMS_07_12", "PCT_LOCLSALE12", 
+                   "DIRSALES12", "PCH_DIRSALES_07_12",
+                   "PC_DIRSALES12", "PCH_PC_DIRSALES_07_12",
+                   "PCH_VEG_FARMS_07_12", "PCH_VEG_ACRES_07_12",
+                   "PCH_VEG_ACRESPTH_07_12", "PCH_FRESHVEG_FARMS_07_12",
+                   "PCH_ORCHARD_FARMS_07_12", "ORCHARD_ACRES12",
+                   "PCH_ORCHARD_ACRES_07_12", "ORCHARD_ACRESPTH12",
+                   "PCH_ORCHARD_ACRESPTH_07_12", "PCH_BERRY_FARMS_07_12",
+                   "PCH_BERRY_ACRES_07_12", "PCH_BERRY_ACRESPTH_07_12",
+                   "PCH_GHVEG_FARMS_07_12", "PCH_GHVEG_SQFT_07_12",
+                   "PCH_GHVEG_SQFTPTH_07_12", "PCH_CSA_07_12",
+                   "PCH_AGRITRSM_OPS_07_12", "AGRITRSM_RCT07",
+                   "PCH_AGRITRSM_RCT_07_12", "FRESHVEG_ACRES07",
+                   "FRESHVEG_ACRESPTH07", "PCH_FRESHVEG_ACRES_07_12",
+                   "PCH_FRESHVEG_ACRESPTH_07_12", "FOODHUB18"))
+sum(is.na(test_US)) # No missing values in testing dataset
+```
+
+## Prepping the datasets for LASSO regression
+
+```{r}
+## TRAINING DATASET ##
+str(train.no.missing, list.len = ncol(train.no.missing))
+train.no.missing[,c("type","County")] <-
+  lapply(train.no.missing[,c("type", "County")], as.factor) # Convert multilevel character to factor variables
+train.no.missing <- train.no.missing %>%
+                    select(-c("Date", "State", "year", "region", "FIPS"))
+xTrain = model.matrix(~ .,  data = train.no.missing %>%
+         dplyr::select(-AveragePrice)) # Auto dummy code factor variables
+
+## TESTING DATASET ##
+test[,c("type","County")] <-
+  lapply(test[,c("type", "County")], as.factor) # Convert multilevel character to factor variables
+test <- test %>%
+        select(-c("Date", "State", "year", "region", "FIPS"))
+xTest = model.matrix(~ .,  data = test %>%
+         dplyr::select(-AveragePrice))
+
+## TESTING US DATASET ##
+test_US[,c("type","County")] <-
+  lapply(test_US[,c("type", "County")], as.factor) # Convert multilevel character to factor variables
+test_US <- test_US %>%
+        select(-c("Date", "State", "year", "region", "FIPS"))
+xTest_US = model.matrix(~ .,  data = test_US %>%
+         dplyr::select(-AveragePrice))
+```
+
+## LASSO regression
+
+```{r}
+## TRAINING DATASET: CALIFORNIA IN 2016 ##
+train.model <- gamlr(x = xTrain, y = train.no.missing$AveragePrice)
+coef(train.model) # Predictors: Large Hass [X4225], XLarge.Bags, typeorganic, LACCESS_POP10, LACCESS_POP15, LACCESS_LOWI10, LACCESS_CHILD15, PCT_HISP10
+plot(train.model)
+pred.train <- predict(train.model, newdata = xTrain, type = "response")
+plot(pred.train, train.no.missing$AveragePrice) 
+cor.test(as.numeric(pred.train), train.no.missing$AveragePrice, method = "pearson", conf.level = 0.95) # Correlation = 0.87
+mean((pred.train-train.no.missing$AveragePrice)^2) # MSE = 0.08
+
+## TESTING DATASET: CALIFORNIA IN 2017 ## 
+pred.test <- predict(train.model, newdata = xTest, type = "response")
+plot(pred.test, test$AveragePrice)
+cor.test(as.numeric(pred.test), test$AveragePrice, method = "pearson", conf.level = 0.95) # Correlation = 0.73
+mean((pred.test-test$AveragePrice)^2) # MSE = 0.14
+```
+
