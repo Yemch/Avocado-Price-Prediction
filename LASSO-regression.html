@@ -1045,7 +1045,7 @@ xTest = model.matrix(~ .,  data = test %&gt;%
 <h2>LASSO regression</h2>
 <pre class="r"><code>## TRAINING DATASET: CALIFORNIA IN 2016 ##
 train.model &lt;- gamlr(x = xTrain, y = train.no.missing$AveragePrice)
-coef(train.model) # Predictors: Large Hass [X4225], XLarge.Bags, typeorganic, LACCESS_POP10, LACCESS_POP15, LACCESS_LOWI10, LACCESS_CHILD15, PCT_HISP10</code></pre>
+coef(train.model) # Predictors: Large Hass [X4225], Extra large bags [XLarge.Bags], Organic avocados [typeorganic], Low access to store in 2010 [LACCESS_POP10], Low access to store in 2015 [LACCESS_POP15], Low income and low access to store in 2010 [LACCESS_LOWI10], Children with low access to store in 2015 [LACCESS_CHILD15], Percent Hispanic in 2010 [PCT_HISP10]</code></pre>
 <pre><code>## 274 x 1 sparse Matrix of class &quot;dgCMatrix&quot;
 ##                                   seg83
 ## intercept                  1.750609e+00

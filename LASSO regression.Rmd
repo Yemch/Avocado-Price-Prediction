@@ -77,7 +77,7 @@ xTest = model.matrix(~ .,  data = test %>%
 ```{r}
 ## TRAINING DATASET: CALIFORNIA IN 2016 ##
 train.model <- gamlr(x = xTrain, y = train.no.missing$AveragePrice)
-coef(train.model) # Predictors: Large Hass [X4225], XLarge.Bags, typeorganic, LACCESS_POP10, LACCESS_POP15, LACCESS_LOWI10, LACCESS_CHILD15, PCT_HISP10
+coef(train.model) # Predictors: Large Hass [X4225], Extra large bags [XLarge.Bags], Organic avocados [typeorganic], Low access to store in 2010 [LACCESS_POP10], Low access to store in 2015 [LACCESS_POP15], Low income and low access to store in 2010 [LACCESS_LOWI10], Children with low access to store in 2015 [LACCESS_CHILD15], Percent Hispanic in 2010 [PCT_HISP10]
 plot(train.model)
 pred.train <- predict(train.model, newdata = xTrain, type = "response")
 plot(pred.train, train.no.missing$AveragePrice) 
