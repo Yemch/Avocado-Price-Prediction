@@ -44,11 +44,15 @@ ui <- dashboardPage(
                     h2("Avovado Prices and Volumns"),
                     fluidRow(
                         box(title = "Choose a county",  status = "primary", solidHeader = F,
+                            
                             selectInput(inputId = "state", label = "State", choices = avocado$State),   
                             uiOutput("select")
+                            
                             ), # box 
+                        
                         box(title = "Choose price or volumn", status = "warning", solidHeader = F,
-                            radioButtons(inputId = "pricevolumn", label = NULL, choices = c("Price","Volumn")) 
+                            radioButtons(inputId = "pricevolumn", label = NULL, choices = c("Price","Volumn")), 
+                            selectInput(inputId = "date", label = "Date", choices = avocado$Date)
                             ) # box 
                     ) # fluidRow
                     
@@ -121,6 +125,12 @@ ui <- dashboardPage(
 
 
 server <- function(input, output) {
+    
+    output$select = renderUI({
+        state = filter(avocado, State == input$state)
+        selectInput(inputId = "county", label = "County", choices = state$County)
+    })
+    
     ###Tab 1 - basic statistics descriptions
     #reactive
     county <- reactive(avocado %>% filter(State %in% input$state & County %in% input$County))
@@ -138,7 +148,7 @@ server <- function(input, output) {
     ##price/volume over time group by county  (line plot)
     renderPlot({
         county() %>%
-            ggplot()+
+            ggplot() +
             geom_line(aes_string(x="Date", y=input$pricevolumn, group="County", col="County"))+ 
             theme_light() +
             scale_x_date(date_breaks = "1 month", date_labels = "%b") +
