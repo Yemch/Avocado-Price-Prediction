@@ -67,6 +67,9 @@ avocado = avocado %>%
   left_join(city2county, by = c("region" = "Location")) %>%
   filter(Include == 1) %>%
   dplyr::select(-X,-Include) # remove the first column
+
+avocado$County1 = ifelse(avocado$region == "Roanoke", "Roanoke", avocado$County1 )
+avocado$County1 = ifelse(avocado$region == "StLouis", "StLouis", avocado$County1 )
 ```
 
 # 2. Food Environment Atlas Data Cleaning
@@ -119,6 +122,7 @@ avocado = avocado %>%
   left_join(foodatlas, by = c("County1" = "County.y", "State" = "State.x"))
 
 avocado = rename(avocado, County = County1)
+avocado$County = tolower(avocado$County)
 dim(avocado)
 ```
 
