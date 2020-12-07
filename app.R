@@ -54,8 +54,15 @@ ui <- dashboardPage(
                             radioButtons(inputId = "pricevolumn", label = NULL, choices = c("Price","Volumn")), 
                             selectInput(inputId = "date", label = "Date", choices = avocado$Date)
                             ) # box 
-                    ) # fluidRow
+                    ), # fluidRow
                     
+                    fluidRow(
+                        box(plotOutput(outputId = "line")), # box
+                        
+                        box(plotOutput(outputId = "map"))
+                        
+                        
+                    ) # fluidRow
                     
                     ), # tabItem1
             
