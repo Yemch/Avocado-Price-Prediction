@@ -1,7 +1,12 @@
+library(ggplot2)
+library(dplyr)
+library(viridis)
+library(maps)
 library(shiny)
 library(shinydashboard)
 
 avocado = read.csv("./avocado_clean.csv")
+countymap <- map_data("county")
 
 # Define UI for application that draws a histogram
 ui <- dashboardPage(
@@ -116,10 +121,40 @@ ui <- dashboardPage(
 
 
 server <- function(input, output) {
-    output$select = renderUI({
-        state <- filter(avocado, State == input$state)
-        selectInput(inputId = "county", label = "County", choices = state$County)
-        })
+    ###Tab 1 - basic statistics descriptions
+    #reactive
+    county <- reactive(avocado %>% filter(State %in% input$state & County %in% input$County))
+    
+    plot_y <- reactive({
+        if(input$pricevolumn=="AveragePrice"){plot_y="Avocado Price"}
+        else{plot_y="Total Volume of Avocado"}
+    })
+    
+    map <- reactive(avocado %>% 
+                        filter(Date %in% input$date) %>%
+                        left_join(countymap, by = c("County"="subregion"))
+    )
+    
+    ##price/volume over time group by county  (line plot)
+    renderPlot({
+        county() %>%
+            ggplot()+
+            geom_line(aes_string(x="Date", y=input$pricevolumn, group="County", col="County"))+ 
+            theme_light() +
+            scale_x_date(date_breaks = "1 month", date_labels = "%b") +
+            labs(title = paste(plot_y(),"Over Time"), y=plot_y())
+    }) 
+    
+    
+    ##volume/price in different counties at a certain time point (heatmap)
+    output$map <- renderPlot({
+        map() %>%
+            ggplot(aes(x=long, y=lat, group=group))+
+            geom_polygon(aes_string(fill=input$pricevolumn), color="white")+
+            labs(title=paste(plot_y(),"on", input$date),x="",y="", fill=plot_y())+
+            coord_fixed(1.3)
+    }) 
+    
 }
 
 # Run the application 
