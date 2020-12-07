@@ -44,7 +44,7 @@ ui <- dashboardPage(
                     h2("Avovado Prices and Volumns"),
                     fluidRow(
                         box(title = "Choose a county",  status = "primary", solidHeader = F,
-                            
+                          
                             selectInput(inputId = "state", label = "State", choices = avocado$State),   
                             uiOutput("select")
                             
