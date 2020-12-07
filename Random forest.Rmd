@@ -1,0 +1,103 @@
+---
+title: "Random forest"
+author: "Nazleen Khan"
+date: "12/7/2020"
+output: html_document
+---
+
+```{r}
+library(tidyverse)
+library(gamlr)
+library(Matrix)
+library(lubridate)
+library(randomForest)
+library(MASS)
+library(knitr)
+```
+
+## Pulling in the wrangled data and creating the training and testing datasets
+
+```{r}
+avocado_clean <- read.csv("avocado_clean.csv") # 10,140 observations of 306 variables
+table(avocado_clean$State)
+train <- avocado_clean %>% 
+         filter(State == "CALIFORNIA" & year == 2016) # Train prediction model using 2016 observations
+test <- avocado_clean %>%
+        filter(State == "CALIFORNIA" & year == 2017) # Test prediction model using 2017 observations
+```
+
+## Assessing descriptive statistics
+
+```{r}
+## TRAINING DATASET ##
+sapply(train, function(x) sum(is.na(x))) # Number missing by column
+train.no.missing <- train[ , colSums(is.na(train)) == 0] # Exclude all columns with missing values
+sum(is.na(train.no.missing)) # No missing values in new training dataset
+train.no.missing <- train.no.missing %>%
+                    dplyr::select(-c("Date", "State", "year", "region", "FIPS"))
+xTrain = train.no.missing %>%
+         dplyr::select(-AveragePrice)
+
+## TESTING DATASET ##
+test <- test %>%
+        dplyr::select(-c("PCH_DIRSALES_FARMS_07_12", "PCT_LOCLSALE12", 
+                   "DIRSALES12", "PCH_DIRSALES_07_12",
+                   "PC_DIRSALES12", "PCH_PC_DIRSALES_07_12",
+                   "PCH_VEG_FARMS_07_12", "PCH_VEG_ACRES_07_12",
+                   "PCH_VEG_ACRESPTH_07_12", "PCH_FRESHVEG_FARMS_07_12",
+                   "PCH_ORCHARD_FARMS_07_12", "ORCHARD_ACRES12",
+                   "PCH_ORCHARD_ACRES_07_12", "ORCHARD_ACRESPTH12",
+                   "PCH_ORCHARD_ACRESPTH_07_12", "PCH_BERRY_FARMS_07_12",
+                   "PCH_BERRY_ACRES_07_12", "PCH_BERRY_ACRESPTH_07_12",
+                   "PCH_GHVEG_FARMS_07_12", "PCH_GHVEG_SQFT_07_12",
+                   "PCH_GHVEG_SQFTPTH_07_12", "PCH_CSA_07_12",
+                   "PCH_AGRITRSM_OPS_07_12", "AGRITRSM_RCT07",
+                   "PCH_AGRITRSM_RCT_07_12", "FRESHVEG_ACRES07",
+                   "FRESHVEG_ACRESPTH07", "PCH_FRESHVEG_ACRES_07_12",
+                   "PCH_FRESHVEG_ACRESPTH_07_12", "FOODHUB18"))
+sum(is.na(test)) # No missing values in testing dataset
+test <- test %>%
+        dplyr::select(-c("Date", "State", "year", "region", "FIPS"))
+xTest <- test %>% dplyr::select(-AveragePrice)
+```
+
+## Random Forest
+
+```{r}
+set.seed(150)  
+train.model <- randomForest(AveragePrice ~ ., data = train.no.missing, mtry = 90)
+train.model
+```
+
+## Evaluating regression performance
+
+```{r}
+pred.train = predict(train.model, newdata = train.no.missing)
+plot(pred.train, train.no.missing$AveragePrice)
+abline(0,1) # Observed vs. predicted values in training set 
+
+mean((pred.train - train.no.missing$AveragePrice)^2) # MSE = 0.007 in training set
+
+pred.test = predict(train.model, newdata = xTest)
+plot(pred.test, test$AveragePrice)
+abline(0,1) # Observed vs. predicted values in testing set 
+
+mean((pred.test - test$AveragePrice)^2) # MSE = 0.10 in testing set
+```
+
+## Identifying important predictors
+
+```{r}
+variable_importance <- importance(train.model) 
+tmp <- tibble(feature = rownames(variable_importance),
+                  Gini = variable_importance[,1]) %>%
+                  arrange(desc(Gini))
+kable(tmp[1:10,])
+
+tmp %>% filter(Gini > 0.15) %>%
+        ggplot(aes(x=reorder(feature, Gini), y=Gini)) +
+        geom_bar(stat='identity') +
+        coord_flip() + xlab("Predictor") +
+        theme(axis.text=element_text(size=8))
+```
+
