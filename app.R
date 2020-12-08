@@ -6,6 +6,8 @@ library(shiny)
 library(shinydashboard)
 
 avocado = read.csv("./avocado_clean.csv")
+avocadodate = read.csv("./avocado_clean.csv")
+avocadodate$Date = as.Date(avocadodate$Date)
 countymap <- map_data("county")
 
 # Define UI for application that draws a histogram
@@ -51,7 +53,7 @@ ui <- dashboardPage(
                             ), # box 
                         
                         box(title = "Choose price or volumn", status = "warning", solidHeader = F,
-                            radioButtons(inputId = "pricevolumn", label = NULL, choices = c("Price","Volumn")), 
+                            radioButtons(inputId = "pricevolumn", label = NULL, choices = c("Price"="AveragePrice","Volume"="Total.Volume")), 
                             selectInput(inputId = "date", label = "Date", choices = avocado$Date)
                             ) # box 
                     ), # fluidRow
@@ -140,7 +142,7 @@ server <- function(input, output) {
     
     ###Tab 1 - basic statistics descriptions
     #reactive
-    county <- reactive(avocado %>% filter(State %in% input$state & County %in% input$County))
+    county <- reactive(avocadodate %>% filter(State %in% input$state & County %in% input$county))
     
     plot_y <- reactive({
         if(input$pricevolumn=="AveragePrice"){plot_y="Avocado Price"}
@@ -149,16 +151,16 @@ server <- function(input, output) {
     
     map <- reactive(avocado %>% 
                         filter(Date %in% input$date) %>%
-                        left_join(countymap, by = c("County"="subregion"))
+                        right_join(countymap, by = c("County"="subregion"))
     )
     
     ##price/volume over time group by county  (line plot)
-    renderPlot({
+    output$line <- renderPlot({
         county() %>%
             ggplot() +
             geom_line(aes_string(x="Date", y=input$pricevolumn, group="County", col="County"))+ 
             theme_light() +
-            scale_x_date(date_breaks = "1 month", date_labels = "%b") +
+            scale_x_date(date_breaks = "3 month", date_labels = "%b") +
             labs(title = paste(plot_y(),"Over Time"), y=plot_y())
     }) 
     
@@ -169,6 +171,7 @@ server <- function(input, output) {
             ggplot(aes(x=long, y=lat, group=group))+
             geom_polygon(aes_string(fill=input$pricevolumn), color="white")+
             labs(title=paste(plot_y(),"on", input$date),x="",y="", fill=plot_y())+
+            scale_fill_viridis_c(option = "plasma") +
             coord_fixed(1.3)
     }) 
     
