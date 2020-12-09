@@ -44,7 +44,7 @@ ui <- dashboardPage(
                     h2("Avovado Prices and Volumns by County Level"),
                     fluidRow(
                         box(title = "Choose a county",  status = "warning", solidHeader = F,
-                            selectInput(inputId = "state", label = "State", choices = avocado$State),   
+                            selectInput(inputId = "county", label = "County", choices = avocado$County,  selected = "los angelas"),   
                             uiOutput("select")
                             ), # box 
                         
@@ -133,15 +133,15 @@ ui <- dashboardPage(
 
 server <- function(input, output) {
     
-    output$select = renderUI({
-        state = filter(avocado, State == input$state)
-        selectInput(inputId = "county", label = "County", choices = state$County)
-    })
+    # output$select = renderUI({
+    #     state = filter(avocado, State == input$state)
+    #     
+    # })
     
     ###Tab 1 - basic statistics descriptions
     #reactive
     plot_y <- reactive({
-        if(input$pricevolumn=="AveragePrice"){plot_y="Avocado Price (Dollar)"}
+        if(input$pricevolumn=="AveragePrice"){ plot_y="Avocado Price (Dollar)"}
         else{plot_y="Total Volume of Avocado"}
     })
     
@@ -150,14 +150,23 @@ server <- function(input, output) {
         else{title ="Total Number of Avocados Sold"}
     })
     
+    ylimit_org = reactive({
+        if(input$pricevolumn=="AveragePrice"){ylimit_org = 3.25}
+        else{ylimit_org = 230000 }
+    })
+    
+    ylimit_con = reactive({
+        if(input$pricevolumn=="AveragePrice"){ylimit_con = 3.25}
+        else{ylimit_con = 5500000}
+    })
     
     ##price/volume over time group by county  (line plot)
     output$line_org <- renderPlot({
         
-    avocado %>% filter(State %in% input$state & County %in% input$county & type == "organic") %>%  
+    avocado %>% filter( County %in% input$county & type == "organic") %>%  
         ggplot() +
         geom_line(aes_string(x="Date", y=input$pricevolumn, group="County"), color = "darkolivegreen4")+
-        ylim(0,3.25) +
+        ylim(0,ylimit_org()) +
         theme_light() +
         scale_x_date(date_breaks = "3 month", date_labels = "%b") +
         labs(title = paste(title(),"(Organic) Over Time"), y=plot_y())
@@ -165,10 +174,10 @@ server <- function(input, output) {
     
     output$line_con <- renderPlot({
         
-        avocado %>% filter(State %in% input$state & County %in% input$county & type == "conventional") %>%  
+        avocado %>% filter( County %in% input$county & type == "conventional") %>%  
             ggplot() +
             geom_line(aes_string(x="Date", y=input$pricevolumn, group="County"), color = "darkolivegreen4")+ 
-            ylim(0,3.25) +
+            ylim(0,ylimit_con()) +
             theme_light() +
             scale_x_date(date_breaks = "3 month", date_labels = "%b") +
             labs(title = paste(title(),"(Conventional) Over Time"), y=plot_y())
@@ -184,8 +193,7 @@ server <- function(input, output) {
         ggplot(aes_string(x= "County", y=input$pricevolumn, fill = input$pricevolumn) )+
         geom_bar(stat="identity") +
         coord_flip()+
-        ylim(0,3.25) +
-#        scale_y_continuous(expand = c(0.01,0.01)) +
+        ylim(0,ylimit_org()) +
         scale_fill_gradient(low = "lightgoldenrod", high = "darkolivegreen3") + 
         theme(legend.position = "none", panel.background = element_blank(), axis.line = element_line()) +
         labs(title=paste(title(),"(Organic) on", input$date), y=plot_y())
@@ -200,8 +208,7 @@ server <- function(input, output) {
             ggplot(aes_string(x= "County", y=input$pricevolumn, fill = input$pricevolumn) )+
             geom_bar(stat="identity") +
             coord_flip() +
-            ylim(0,3.25) +
-  #          scale_y_continuous(expand = c(0.01,0.01)) +
+            ylim(0,ylimit_con()) +
             scale_fill_gradient(low = "lightgoldenrod", high = "darkolivegreen3") + 
             theme(legend.position = "none", panel.background = element_blank(), axis.line = element_line()) +
             labs(title=paste(title(),"(Conventional) on", input$date), y=plot_y())
