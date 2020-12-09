@@ -8,7 +8,6 @@ library(shinydashboard)
 avocado = read.csv("./avocado_clean.csv")
 avocadodate = read.csv("./avocado_clean.csv")
 avocadodate$Date = as.Date(avocadodate$Date)
-countymap <- map_data("county")
 
 # Define UI for application that draws a histogram
 ui <- dashboardPage(
@@ -61,7 +60,7 @@ ui <- dashboardPage(
                     fluidRow(
                         box(plotOutput(outputId = "line")), # box
                         
-                        box(plotOutput(outputId = "map"))
+                        box(plotOutput(outputId = "bar"))
                         
                         
                     ) # fluidRow
@@ -149,9 +148,8 @@ server <- function(input, output) {
         else{plot_y="Total Volume of Avocado"}
     })
     
-    map <- reactive(avocado %>% 
-                        filter(Date %in% input$date) %>%
-                        right_join(countymap, by = c("County"="subregion"))
+    bar <- reactive(avocado %>% 
+                        filter(Date %in% input$date) 
     )
     
     ##price/volume over time group by county  (line plot)
@@ -163,16 +161,14 @@ server <- function(input, output) {
             scale_x_date(date_breaks = "3 month", date_labels = "%b") +
             labs(title = paste(plot_y(),"Over Time"), y=plot_y())
     }) 
-    
-    
-    ##volume/price in different counties at a certain time point (heatmap)
-    output$map <- renderPlot({
-        map() %>%
-            ggplot(aes(x=long, y=lat, group=group))+
-            geom_polygon(aes_string(fill=input$pricevolumn), color="white")+
-            labs(title=paste(plot_y(),"on", input$date),x="",y="", fill=plot_y())+
-            scale_fill_viridis_c(option = "plasma") +
-            coord_fixed(1.3)
+  
+    ##volume/price in different counties at a certain time point (barplot)
+    output$bar <- renderPlot({
+        bar() %>%
+            ggplot(aes_string(x="County", y=input$pricevolumn))+
+            geom_bar(stat="identity")+
+            coord_flip()+
+            labs(title=paste(plot_y(),"on", input$date), y=plot_y())
     }) 
     
 }
