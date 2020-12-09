@@ -2,6 +2,10 @@
 
 Authors: Group 6 - Chuanjie Deng, Mingchen Ye, Nazleen Khan
 
+Our website can be found [here]().
+
+Our screencast can be found [here]().
+
 ### Goal of this project
 
 1. To describe avocado prices and volumes across different counties of the US and the changes over time.
@@ -20,6 +24,4 @@ We first cleaned the `avocado.csv` with unclear region descriptions and restrict
 - Food Environment Atlas datasets are in the `FoodAtlasData` folder, downloaded from [here](https://www.ers.usda.gov/data-products/food-environment-atlas/data-access-and-documentation-downloads/)
 - City to county mapping data: `Cities-Counties-States.xlsx`
 
-Our website can be found [here]().
 
-Our screencast can be found [here]().
