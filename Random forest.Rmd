@@ -13,80 +13,70 @@ library(lubridate)
 library(randomForest)
 library(MASS)
 library(knitr)
+library(caTools)
 ```
 
 ## Pulling in the wrangled data and creating the training and testing datasets
-
 ```{r}
 avocado_clean <- read.csv("avocado_clean.csv") # 10,140 observations of 306 variables
 table(avocado_clean$State)
-train <- avocado_clean %>% 
-         filter(State == "CALIFORNIA" & year == 2016) # Train prediction model using 2016 observations
-test <- avocado_clean %>%
-        filter(State == "CALIFORNIA" & year == 2017) # Test prediction model using 2017 observations
+avocado_ca_2016 <- avocado_clean %>%
+                   filter(State == "CALIFORNIA" & year == 2016) %>% 
+                   dplyr::select(c("AveragePrice", "Total.Volume", "Total.Bags", "type",
+                                   "County", "Population_Estimate_2016", "PCT_LACCESS_POP15",
+                                   "GROCPTH16", "SUPERCPTH16", "CONVSPTH16", "SPECSPTH16",
+                                   "SNAPSPTH12", "WICSPTH16", "FFRPTH16", "FSRPTH16", 
+                                   "PC_FFRSALES12", "PC_FSRSALES12", "PCH_FDPIR_12_15",
+                                   "SODATAX_STORES14", "SODATAX_VENDM14", "CHIPSTAX_STORES14",
+                                   "CHIPSTAX_VENDM14", "FOOD_TAX14",
+                                   "DIRSALES_FARMS12", "PC_DIRSALES07", "VEG_FARMS12",
+                                   "FRESHVEG_ACRES12", "ORCHARD_FARMS12", "BERRY_FARMS12",
+                                   "SLHOUSE12", "GHVEG_FARMS12", "CSA12", "AGRITRSM_OPS12",
+                                   "FARM_TO_SCHOOL15", "PCT_DIABETES_ADULTS13", "RECFACPTH16",
+                                   "PCT_NHWHITE10", "PCT_NHBLACK10", "PCT_HISP10", "PCT_NHASIAN10",
+                                   "PCT_NHNA10", "PCT_NHPI10", "PCT_65OLDER10", "PCT_18YOUNGER10",
+                                   "MEDHHINC15", "POVRATE15", "METRO13", "POPLOSS10"))
+# Train and test prediction model using 2017 observations from California # 416 observations of 48 variables
+set.seed(101)
+sample = sample.split(avocado_ca_2016, SplitRatio = 0.70)
+train = subset(avocado_ca_2016, sample == TRUE)
+test = subset(avocado_ca_2016, sample == FALSE) # Randomly split 2016 data into 70:30 training and testing datasets
+
 ```
 
 ## Assessing descriptive statistics
-
 ```{r}
-## TRAINING DATASET ##
-sapply(train, function(x) sum(is.na(x))) # Number missing by column
-train.no.missing <- train[ , colSums(is.na(train)) == 0] # Exclude all columns with missing values
-sum(is.na(train.no.missing)) # No missing values in new training dataset
-train.no.missing <- train.no.missing %>%
-                    dplyr::select(-c("Date", "State", "year", "region", "FIPS"))
-xTrain = train.no.missing %>%
-         dplyr::select(-AveragePrice)
+## TRAINING DATASET 
+sum(is.na(train)) # 0 missing observations in training dataset
 
-## TESTING DATASET ##
-test <- test %>%
-        dplyr::select(-c("PCH_DIRSALES_FARMS_07_12", "PCT_LOCLSALE12", 
-                   "DIRSALES12", "PCH_DIRSALES_07_12",
-                   "PC_DIRSALES12", "PCH_PC_DIRSALES_07_12",
-                   "PCH_VEG_FARMS_07_12", "PCH_VEG_ACRES_07_12",
-                   "PCH_VEG_ACRESPTH_07_12", "PCH_FRESHVEG_FARMS_07_12",
-                   "PCH_ORCHARD_FARMS_07_12", "ORCHARD_ACRES12",
-                   "PCH_ORCHARD_ACRES_07_12", "ORCHARD_ACRESPTH12",
-                   "PCH_ORCHARD_ACRESPTH_07_12", "PCH_BERRY_FARMS_07_12",
-                   "PCH_BERRY_ACRES_07_12", "PCH_BERRY_ACRESPTH_07_12",
-                   "PCH_GHVEG_FARMS_07_12", "PCH_GHVEG_SQFT_07_12",
-                   "PCH_GHVEG_SQFTPTH_07_12", "PCH_CSA_07_12",
-                   "PCH_AGRITRSM_OPS_07_12", "AGRITRSM_RCT07",
-                   "PCH_AGRITRSM_RCT_07_12", "FRESHVEG_ACRES07",
-                   "FRESHVEG_ACRESPTH07", "PCH_FRESHVEG_ACRES_07_12",
-                   "PCH_FRESHVEG_ACRESPTH_07_12", "FOODHUB18"))
-sum(is.na(test)) # No missing values in testing dataset
-test <- test %>%
-        dplyr::select(-c("Date", "State", "year", "region", "FIPS"))
-xTest <- test %>% dplyr::select(-AveragePrice)
+## TESTING DATASET 
+sum(is.na(test)) # 0 missing observations in testing dataset
+xTest <- test %>% dplyr::select(-AveragePrice) # Retain all predictors and exclude outcome variable
 ```
 
-## Random Forest
-
+## Running random forest in training dataset
 ```{r}
 set.seed(150)  
-train.model <- randomForest(AveragePrice ~ ., data = train.no.missing, mtry = 90)
+train.model <- randomForest(AveragePrice ~ ., data = train, mtry = 15) # p/3 = 47 predictors/3 = 15 nodes
 train.model
 ```
 
-## Evaluating regression performance
-
+## Evaluating random forest performance in testing dataset
 ```{r}
-pred.train = predict(train.model, newdata = train.no.missing)
-plot(pred.train, train.no.missing$AveragePrice)
-abline(0,1) # Observed vs. predicted values in training set 
+pred.train = predict(train.model, newdata = train)
+plot(pred.train, train$AveragePrice)
+abline(0,1) # Observed vs. predicted values in 2016 training dataset 
 
-mean((pred.train - train.no.missing$AveragePrice)^2) # MSE = 0.007 in training set
+mean((pred.train - train$AveragePrice)^2) # MSE = 0.028 in 2016 training dataset
 
 pred.test = predict(train.model, newdata = xTest)
 plot(pred.test, test$AveragePrice)
-abline(0,1) # Observed vs. predicted values in testing set 
+abline(0,1) # Observed vs. predicted values in testing dataset 
 
-mean((pred.test - test$AveragePrice)^2) # MSE = 0.10 in testing set
+mean((pred.test - test$AveragePrice)^2) # MSE = 0.051 in 2016 testing dataset
 ```
 
 ## Identifying important predictors
-
 ```{r}
 variable_importance <- importance(train.model) 
 tmp <- tibble(feature = rownames(variable_importance),
@@ -99,5 +89,14 @@ tmp %>% filter(Gini > 0.15) %>%
         geom_bar(stat='identity') +
         coord_flip() + xlab("Predictor") +
         theme(axis.text=element_text(size=8))
+```
+
+## Predicting avocado price in California in 2017
+```{r}
+avocado_ca_2017 <- avocado_clean %>%
+                   filter(State == "CALIFORNIA" & year == 2017) %>% 
+                   dplyr::select(-"AveragePrice")
+pred.2017 = predict(train.model, newdata = avocado_ca_2017)
+plot(as.factor(avocado_ca_2017$County), pred.2017)
 ```
 
