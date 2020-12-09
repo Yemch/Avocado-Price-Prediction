@@ -69,7 +69,30 @@ ui <- dashboardPage(
             
             # ----- The second page-------
             tabItem(tabName = "predictors",
-                    h2("Characteristics of Predictors")), # tabItem2
+                    h2("Characteristics of Predictors"),
+                    
+                    fluidRow(
+                        box(title = "Select a continuous predictor", status = "warning", solidHeader = F,
+                            selectInput(inputId = "con_predictor", label = "Continuous predictor", choices = colnames(avocado))
+                            ),   # NEED TO MODIFY CHOICES
+                        box(title = "Select a categorical predictor", status = "warning", solidHeader = F,
+                            selectInput(inputId = "con_predictor", label = "Continuous predictor", choices = colnames(avocado))
+                            ) # box     # NEED TO MODIFY CHOICES
+                    ), #fluidRow
+                    
+                    fluidRow(
+                        box(plotOutput(outputId = "line_obs"),
+                            plotOutput(outputId = "line_pred")), # box
+                        
+                        box(plotOutput(outputId = "bar_obs"),
+                            plotOutput(outputId = "bar_pred"))
+                    ) # fluidRow
+
+                    
+                    ), # tabItem2
+            
+            
+            
             
             # ----- The third page-------
             tabItem(tabName = "prediction",
