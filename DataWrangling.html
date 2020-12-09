@@ -375,6 +375,19 @@ summary {
 </div>
 
 
+<div id="project-overview-and-motivation" class="section level1">
+<h1>0. Project Overview and Motivation</h1>
+<p>The US demand for avocados has increased substantially since the 1980s (Carman HF, 2018). As a healthy superfood, avocados can be easily incorporated into several meals to meet requirements for daily intake of fiber, potassium, and monounsaturated fatty acids (Carman HF, 2018). If high demand for avocados leads to more competitive pricing, individuals in certain areas may not be able to incorporate avocados into their diets. We propose a US county-level descriptive analysis of avocado prices in comparison with food environment characteristics. We will also use these and related variables to predict avocado prices in California, a large US state with a diverse range of food environments. Our goal is to use this algorithm to predict avocado prices in other regions of the US to (1) provide context for area-specific food choices and (2) offer information on locations where avocados may be more reasonably priced.</p>
+<p>Our project will :</p>
+<ul>
+<li><p>describe avocado prices and volumes across different counties of the US and the changes over time.</p></li>
+<li><p>predict avocado prices using predictors such as race percentage, income level, access and proximity to grocery store, and food purchasing assistance at the county level in California.</p></li>
+</ul>
+<p>References:</p>
+<p>Carman HF. (2018). The story behind avocados’ rise to prominence in the United States. Giannini Foundation of Agricultural Economics, University of California. Accessed 11/01/2020 at <a href="https://s.giannini.ucop.edu/uploads/giannini_public/5c/1f/5c1fa9d0-c5c9-45ce-8606-149ddf4f7397/v22n5_3.pdf" class="uri">https://s.giannini.ucop.edu/uploads/giannini_public/5c/1f/5c1fa9d0-c5c9-45ce-8606-149ddf4f7397/v22n5_3.pdf</a>.</p>
+<p>US Department of Agriculture. (2020). US avocado demand is climbing steadily. Accessed 11/01/2020 at <a href="https://www.ers.usda.gov/data-products/chart-gallery/gallery/chart-detail/?chartId=98071" class="uri">https://www.ers.usda.gov/data-products/chart-gallery/gallery/chart-detail/?chartId=98071</a>.</p>
+<hr />
+<p>This Rmd is for the data wrangling process. We first cleaned the <code>avocado.csv</code> with unclear region descriptions and restricted the data only at city level. Since avocado prices data is mainly at city level and the Food Environment Atlas datasets are at county level, we created a new dataset <code>Cities-Counties-States.xlsx</code> mannualy for linking the cities to counties. After that, we merged prices data and food environment data together by the same county in the same state. Finally, a cleaned version of data is outputed as <code>avocado_clean.csv</code>.</p>
 <pre class="r"><code>library(tidyverse)</code></pre>
 <pre><code>## ── Attaching packages ─────────────────────────────────────── tidyverse 1.3.0 ──</code></pre>
 <pre><code>## ✓ ggplot2 3.3.2     ✓ purrr   0.3.4
@@ -386,6 +399,7 @@ summary {
 ## x dplyr::lag()    masks stats::lag()</code></pre>
 <pre class="r"><code>library(readxl)
 library(purrr)</code></pre>
+</div>
 <div id="avocado-prices-data-cleaning" class="section level1">
 <h1>1. Avocado Prices Data Cleaning</h1>
 <p>Historical data on avocado prices and sales volume in multiple US markets. This data contains the outcome - the average price of a single avocado. The prices are summerised at city-level. Source: <a href="https://www.kaggle.com/neuromusic/avocado-prices" class="uri">https://www.kaggle.com/neuromusic/avocado-prices</a></p>

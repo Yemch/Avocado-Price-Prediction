@@ -3,6 +3,28 @@ title: "Data Wrangling"
 output: html_document
 ---
 
+# 0. Project Overview and Motivation
+
+The US demand for avocados has increased substantially since the 1980s (Carman HF, 2018). As a healthy superfood, avocados can be easily incorporated into several meals to meet requirements for daily intake of fiber, potassium, and monounsaturated fatty acids (Carman HF, 2018). If high demand for avocados leads to more competitive pricing, individuals in certain areas may not be able to incorporate avocados into their diets. We propose a US county-level descriptive analysis of avocado prices in comparison with food environment characteristics. 
+We will also use these and related variables to predict avocado prices in California, a large US state with a diverse range of food environments. Our goal is to use this algorithm to predict avocado prices in other regions of the US to (1) provide context for area-specific food choices and (2) offer information on locations where avocados may be more reasonably priced.
+
+Our project will :
+
+- describe avocado prices and volumes across different counties of the US and the changes over time.
+
+- predict avocado prices using predictors such as race percentage, income level, access and proximity to grocery store, and food purchasing assistance at the county level in California.
+
+References:
+
+Carman HF. (2018). The story behind avocados’ rise to prominence in the United States. Giannini Foundation of Agricultural Economics, University of California. Accessed 11/01/2020 at https://s.giannini.ucop.edu/uploads/giannini_public/5c/1f/5c1fa9d0-c5c9-45ce-8606-149ddf4f7397/v22n5_3.pdf.
+
+US Department of Agriculture. (2020). US avocado demand is climbing steadily. Accessed 11/01/2020 at https://www.ers.usda.gov/data-products/chart-gallery/gallery/chart-detail/?chartId=98071.
+
+---------------------
+
+This Rmd is for the data wrangling process. We first cleaned the `avocado.csv` with unclear region descriptions and restricted the data only at city level. Since avocado prices data is mainly at city level and the Food Environment Atlas datasets are at county level, we created a new dataset `Cities-Counties-States.xlsx` mannualy for linking the cities to counties. After that, we merged prices data and food environment data together by the same county in the same state. Finally, a cleaned version of data is outputed as `avocado_clean.csv`.
+
+
 ```{r}
 library(tidyverse)
 library(readxl)
