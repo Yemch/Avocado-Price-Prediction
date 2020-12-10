@@ -17,108 +17,9 @@ library(knitr)
 library(caTools)
 ```
 
-## Pulling in the wrangled data and creating the training and testing datasets
-```{r}
-avocado_clean <- read.csv("avocado_clean.csv") # 10,140 observations of 306 variables
-avocado_ca_2017 <- avocado_clean %>%
-                   filter(State == "CALIFORNIA" & year == 2017) %>% 
-                   dplyr::select(c("AveragePrice", "Total.Volume", "Total.Bags", "type",
-                                   "County", "Population_Estimate_2016", "PCT_LACCESS_POP15",
-                                   "GROCPTH16", "SUPERCPTH16", "CONVSPTH16", "SPECSPTH16",
-                                   "SNAPSPTH12", "WICSPTH16", "FFRPTH16", "FSRPTH16", 
-                                   "PC_FFRSALES12", "PC_FSRSALES12", "PCH_FDPIR_12_15",
-                                   "SODATAX_STORES14", "SODATAX_VENDM14", "CHIPSTAX_STORES14",
-                                   "CHIPSTAX_VENDM14", "FOOD_TAX14",
-                                   "DIRSALES_FARMS12", "PC_DIRSALES07", "VEG_FARMS12",
-                                   "FRESHVEG_ACRES12", "ORCHARD_FARMS12", "BERRY_FARMS12",
-                                   "SLHOUSE12", "GHVEG_FARMS12", "CSA12", "AGRITRSM_OPS12",
-                                   "FARM_TO_SCHOOL15", "PCT_DIABETES_ADULTS13", "RECFACPTH16",
-                                   "PCT_NHWHITE10", "PCT_NHBLACK10", "PCT_HISP10", "PCT_NHASIAN10",
-                                   "PCT_NHNA10", "PCT_NHPI10", "PCT_65OLDER10", "PCT_18YOUNGER10",
-                                   "MEDHHINC15", "POVRATE15", "METRO13", "POPLOSS10"))
-# Train and test prediction model using 2017 observations from California 
-# 424 observations of 48 variables 
-# Pre-selected variables without substantial missingness or correlation from subject matter knowledge
-set.seed(101)
-sample = sample.split(avocado_ca_2017, SplitRatio = 0.70)
-train = subset(avocado_ca_2017, sample == TRUE)
-test = subset(avocado_ca_2017, sample == FALSE) 
-# Randomly split 2017 California data into 70:30 training and testing datasets
-```
-
-## Assessing missing data
-```{r}
-## TRAINING DATASET 
-sum(is.na(train)) 
-# 0 missing observations in training dataset
-
-## TESTING DATASET 
-sum(is.na(test)) 
-# 0 missing observations in testing dataset
-xTest <- test %>% dplyr::select(-AveragePrice) 
-# Retain all predictors and exclude outcome variable
-```
-
-## Running random forest in training dataset
-```{r}
-set.seed(150)  
-train.model <- randomForest(AveragePrice ~ ., data = train, mtry = 15, nodesize = 10) 
-# p/3 = 47 predictors/3 = 15 variables tried at each split
-# mtry reduces correlation between trees and improves accuracy
-# nodesize refers to the minimum number of observations at each split
-train.model
-```
-
-## Evaluating random forest performance in training and testing datasets
-```{r}
-pred.train = predict(train.model, newdata = train)
-head(pred.train)
-plot(pred.train, train$AveragePrice)
-abline(0,1) 
-# Observed vs. predicted values in 2017 California training dataset 
-
-mean((pred.train - train$AveragePrice)^2) 
-# MSE = 0.035 in 2017 training dataset
-cor.test(as.numeric(pred.train), train$AveragePrice, method = "pearson", conf.level = 0.95)
-# Pearson correlation coefficient = 0.94
-
-pred.test = predict(train.model, newdata = xTest)
-head(pred.test)
-plot(pred.test, test$AveragePrice)
-abline(0,1) 
-# Observed vs. predicted values in 2017 California testing dataset 
-
-mean((pred.test - test$AveragePrice)^2) 
-# MSE = 0.042 in 2017 testing dataset
-cor.test(as.numeric(pred.test), test$AveragePrice, method = "pearson", conf.level = 0.95)
-# Pearson correlation coefficient = 0.92
-```
-
-## Identifying important predictors
-```{r}
-variable_importance <- importance(train.model) 
-tmp <- tibble(feature = rownames(variable_importance),
-                  Gini = variable_importance[,1]) %>%
-                  arrange(desc(Gini))
-kable(tmp[1:10,])
-
-tmp %>% filter(Gini > 0.50) %>%
-        ggplot(aes(x = reorder(feature, Gini), y = Gini)) +
-        geom_bar(stat = 'identity') +
-        coord_flip() + xlab("Predictor") +
-        theme(axis.text = element_text(size = 8))
-```
-
-## Range of avocado price predictions in California in 2017 by county
-```{r}
-avocado_ca_2017_full <- avocado_clean %>%
-                        filter(State == "CALIFORNIA" & year == 2017) %>% 
-                        dplyr::select(-"AveragePrice")
-pred.2017.ca = predict(train.model, newdata = avocado_ca_2017_full)
-plot(as.factor(avocado_ca_2017_full$County), pred.2017.ca)
-```
-
 ## Extending inference to whole United States in 2017
+
+## Pulling in the wrangled data and creating the training and testing datasets
 ```{r}
 avocado_clean <- read.csv("avocado_clean.csv") # 10,140 observations of 306 variables
 avocado_2017 <- avocado_clean %>%
@@ -199,7 +100,7 @@ xTest %>% ggplot() +
           scale_y_continuous(breaks = seq(0, 3.25, 0.25)) + 
           xlab("Predicted avocado price in the US 2017 testing data (US dollars)") + 
           ylab("Observed avocado price in the US 2017 testing data (US dollars)") + 
-          ggtitle("Observed versus predicted avocado prices in the US testing data")
+          ggtitle("Observed versus predicted avocado prices in the US 2017 testing data")
 # Observed vs. predicted values in 2017 testing dataset 
 
 mean((pred.test - test$AveragePrice)^2) 
