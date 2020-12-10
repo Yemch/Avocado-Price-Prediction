@@ -131,15 +131,17 @@ ui <- dashboardPage(
                             numericInput("PC_FSRSALES12",  "Expenditures per capita, restaurants, (dollar):", value = 722.6)
                         ), # box 
                         
-                        
-                        box(title = "Output", status = "warning", solidHeader = T,
 
+                        box(title = "Output", status = "warning", solidHeader = T,
                             actionButton("button", "Predict Now"),
-                            valueBoxOutput("predvalue")
-                           
+                            br(), br(), br(), br(),
+                            valueBoxOutput("predvalue", width = 6)
+                            
                         ) # box 
                         
-                    ) # fuildRow
+                    ) # fluidRow
+ 
+                    
                     
                     ), # tabItem3
             
