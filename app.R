@@ -7,6 +7,12 @@ library(shinydashboard)
 
 avocado = read.csv("./avocado_clean.csv")
 avocado$Date = as.Date(avocado$Date)
+codebook = readxl::read_excel("./codebook.xlsx") # to get the descriptions of variable codes
+# Get the categorical and continuous variables separately 
+cat_vars = codebook %>% filter(type == "categorical")
+con_vars = codebook %>% filter(type == "continuous") %>% filter(Variable  != "AveragePrice")
+source("./Random_forest.R") # get our random forest prediction model
+avocado$price_pred = predict(train.model.us, newdata = avocado) 
 
 # Define UI for application that draws a histogram
 ui <- dashboardPage(
@@ -44,7 +50,7 @@ ui <- dashboardPage(
                     h2("Avovado Prices and Volumns by County Level"),
                     fluidRow(
                         box(title = "Choose a county",  status = "warning", solidHeader = F,
-                            selectInput(inputId = "county", label = "County", choices = avocado$County,  selected = "los angelas"),   
+                            selectInput(inputId = "county", label = "County", choices = avocado$County,  selected = "los angeles"),   
                             uiOutput("select")
                             ), # box 
                         
@@ -75,16 +81,16 @@ ui <- dashboardPage(
                     
                     fluidRow(
                         box(title = "Select a continuous predictor", status = "warning", solidHeader = F,
-                            selectInput(inputId = "con_predictor", label = "Continuous predictor", choices = colnames(avocado))
-                            ),   # NEED TO MODIFY CHOICES
+                            selectInput(inputId = "con_predictor", label = "Continuous predictor", choices = con_vars$Description)
+                            ),  # box
                         box(title = "Select a categorical predictor", status = "warning", solidHeader = F,
-                            selectInput(inputId = "cat_predictor", label = "Categorical predictor", choices = colnames(avocado))
-                            ) # box     # NEED TO MODIFY CHOICES
+                            selectInput(inputId = "cat_predictor", label = "Categorical predictor", choices = cat_vars$Description)
+                            ) # box     
                     ), #fluidRow
                     
                     fluidRow(
                         box(plotOutput(outputId = "line_obs"),
-                            plotOutput(outputId = "line_pred")), # box
+                            plotOutput(outputId = "line_pred")), 
                         
                         box(plotOutput(outputId = "bar_obs"),
                             plotOutput(outputId = "bar_pred"))
@@ -98,8 +104,40 @@ ui <- dashboardPage(
             
             # ----- The third page-------
             tabItem(tabName = "prediction",
-                    h2("Avocado Price Prediction")), # tabItem3
+                    h2("Avocado Price Prediction"),
+                    
+                    fluidRow(
+                        box(title = "Input the values of predictors:", status = "warning", solidHeader = T,
+                            selectInput(inputId = "county2", label = "County", choices = avocado$County,  selected = "los angeles"),
+                            selectInput("type","Type of avocado, conventional or organic:", choices = avocado$type),
+                            # The initial values are chosen as median
+                            numericInput("totalbags", "Total number of bags of avocados sold:", value = 21270),
+                            numericInput("totalvolumn","Total number of avocados sold:", value = 61554),
+                            numericInput("asian", "% Asian in the county:", value = 4.330),
+                            numericInput("Hawaiian", "% Hawaiian or Pacific Islander:", value = 0.056),
+                            numericInput("PC_FFRSALES12", "Expenditures per capita, fast food, (dollar):",value = 610.0),
+                            numericInput("SPECSPTH16", "Specialized food stores/1,000 pop:",value = 0.0726),
+                            numericInput("GROCPTH16", "Grocery stores/1,000 pop:", value = 0.1905),
+                            numericInput("MEDHHINC15", "Median household income:", value = 56600),
+                            numericInput("PC_FSRSALES12", "Expenditures per capita, restaurants, (dollar):", value = 722.6)
+                        ), # box 
+                        
+                        box(title = "Output", status = "warning", solidHeader = T,
+                            actionButton("button", "Predict Now", class = "btn-primary btn-lg"),
+                            textOutput('predvalue')
+#                            valueBoxOutput("valueBox"),
+#                            tableOutput("test")
+                            
+                        ) # box 
+                        
+                    ) # fuildRow
+                    
+                    ), # tabItem3
             
+            
+            
+            
+            # ----- The fourth page-------
             tabItem(tabName = "about",
                     
                     h2("About"), 
@@ -157,11 +195,6 @@ ui <- dashboardPage(
 
 
 server <- function(input, output) {
-    
-    # output$select = renderUI({
-    #     state = filter(avocado, State == input$state)
-    #     
-    # })
     
     ###Tab 1 - basic statistics descriptions
     #reactive
@@ -238,6 +271,91 @@ server <- function(input, output) {
             theme(legend.position = "none", panel.background = element_blank(), axis.line = element_line()) +
             labs(title=paste(title(),"(Conventional) on", input$date), y=plot_y())
     })
+    
+    ### Tab 2 - predictors characteristics
+    
+    con_predictor = reactive({
+        code = codebook %>% filter(input$con_predictor)
+        return(code$Variable)})
+    
+    cat_predictor = reactive({
+        code = codebook %>% filter(input$cat_predictor)
+        return(code$Variable)})
+    
+    output$line_obs = renderPlot({
+    
+    # 这里的predictor()是user input 的 predictor的名字比如“Total.Volume”
+    # ggplot(aes_string(x = predictor(), y = "AveragePrice")) ...
+            
+    })
+    
+    output$line_pred = renderPlot({
+        
+    })
+    
+    output$bar_obs = renderPlot({
+        
+    })
+    
+    output$bar_obs = renderPlot({
+        
+    })
+    
+    
+    ### Tab 3 - Prediction using users input values
+    
+    # Make a dataframe for users input 
+
+
+
+    users.input = eventReactive(
+        input$button, { data.frame(
+                             type = input$type, 
+                             Total.Bags = input$totalbags,        Total.Volume = input$totalvolunm,
+                             PCT_NHASIAN10 = input$asian,         PCT_NHPI10 = input$Hawaiian,
+                             PC_FFRSALES12 = input$PC_FFRSALES12, County = input$county2,
+                             SPECSPTH16 = input$SPECSPTH1,        GROCPTH16 = input$GROCPTH16,
+                             MEDHHINC15 = input$MEDHHINC15,       PC_FSRSALES12 = input$PC_FSRSALES12,
+
+                             Population_Estimate_2016 = 1625744, PCT_LACCESS_POP15 = 17.6311, SUPERCPTH16 = 0.0165,
+                             CONVSPTH16 = 0.3583,                SNAPSPTH12 = 0.7144,         WICSPTH16 = 0.1076,     FFRPTH16 = 0.8482,
+                             FSRPTH16 = 0.7814,                  SODATAX_STORES14 = 6.00 ,    SODATAX_VENDM14 = 6,    CHIPSTAX_STORES14 = 0,
+                             CHIPSTAX_VENDM14 = 5.150,           PCH_FDPIR_12_15 = 0,         FOOD_TAX14 = 0.5,       METRO13 = 1,
+                             DIRSALES_FARMS12 = 55,              VEG_FARMS12 = 28,            ORCHARD_FARMS12 = 23,   BERRY_FARMS12 = 12,
+                             SLHOUSE12 = 2,                      GHVEG_FARMS12 = 6,           CSA12= 7,               AGRITRSM_OPS12 = 10,
+                             AGRITRSM_OPS12 = 1,                 PCT_DIABETES_ADULTS13 = 9.15,RECFACPTH16 = 0.1169,   PCT_NHWHITE10 = 55.15,
+                             PCT_NHBLACK10 = 14.319,             PCT_HISP10 = 9.725,          PCT_NHNA10 = 0.2303,    PCT_65OLDER10 = 11.155,
+                             PCT_18YOUNGER10 = 23.47,            POVRATE15 = 15.7,            POPLOSS10 = 0
+
+                             ) }) # eventReactive
+    output$predvalue = renderText({ predict(train.model.us, users.input()) [[1]] })
+    
+    #####
+    # output$valueBox = renderValueBox({ 
+    #     
+    #     input$button
+    #     
+    #     dt = isolate(data.frame(
+    #         type = input$type, Total.Bags = input$totalbags, Total.Volume = input$totalvolunm,
+    #         PCT_NHASIAN10 = input$asian,         PCT_NHPI10 = input$Hawaiian, 
+    #         PC_FFRSALES12 = input$PC_FFRSALES12, County = input$county2, 
+    #         SPECSPTH16 = input$SPECSPTH1,        GROCPTH16 = input$GROCPTH16, 
+    #         MEDHHINC15 = input$MEDHHINC15,       PC_FSRSALES12 = input$PC_FSRSALES12,
+    #         
+    #         Population_Estimate_2016 = 1625744, PCT_LACCESS_POP15 = 17.6311, SUPERCPTH16 = 0.0165,
+    #         CONVSPTH16 = 0.3583,                SNAPSPTH12 = 0.7144,         WICSPTH16 = 0.1076,     FFRPTH16 = 0.8482,
+    #         FSRPTH16 = 0.7814,                  SODATAX_STORES14 = 6.00 ,    SODATAX_VENDM14 = 6,    CHIPSTAX_STORES14 = 0, 
+    #         CHIPSTAX_VENDM14 = 5.150,           PCH_FDPIR_12_15 = 0,         FOOD_TAX14 = 0.5,       METRO13 = 1, 
+    #         DIRSALES_FARMS12 = 55,              VEG_FARMS12 = 28,            ORCHARD_FARMS12 = 23,   BERRY_FARMS12 = 12, 
+    #         SLHOUSE12 = 2,                      GHVEG_FARMS12 = 6,           CSA12= 7,               AGRITRSM_OPS12 = 10, 
+    #         AGRITRSM_OPS12 = 1,                 PCT_DIABETES_ADULTS13 = 9.15,RECFACPTH16 = 0.1169,   PCT_NHWHITE10 = 55.15, 
+    #         PCT_NHBLACK10 = 14.319,             PCT_HISP10 = 9.725,          PCT_NHNA10 = 0.2303,    PCT_65OLDER10 = 11.155, 
+    #         PCT_18YOUNGER10 = 23.47,            POVRATE15 = 15.7,            POPLOSS10 = 0
+    #         
+    #     ))
+    #     
+    #     valueBox(predict(train.model.us, newdata = dt)[1] ) }) # renderValueBox
+    
     
 } # server
 
