@@ -317,15 +317,16 @@ server <- function(input, output) {
                              SPECSPTH16 = input$SPECSPTH1,        GROCPTH16 = input$GROCPTH16,
                              MEDHHINC15 = input$MEDHHINC15,       PC_FSRSALES12 = input$PC_FSRSALES12,
 
-                             Population_Estimate_2016 = 1625744, PCT_LACCESS_POP15 = 17.6311, SUPERCPTH16 = 0.0165,
-                             CONVSPTH16 = 0.3583,                SNAPSPTH12 = 0.7144,         WICSPTH16 = 0.1076,     FFRPTH16 = 0.8482,
-                             FSRPTH16 = 0.7814,                  SODATAX_STORES14 = 6.00 ,    SODATAX_VENDM14 = 6,    CHIPSTAX_STORES14 = 0,
-                             CHIPSTAX_VENDM14 = 5.150,           PCH_FDPIR_12_15 = 0,         FOOD_TAX14 = 0.5,       METRO13 = 1,
-                             DIRSALES_FARMS12 = 55,              VEG_FARMS12 = 28,            ORCHARD_FARMS12 = 23,   BERRY_FARMS12 = 12,
-                             SLHOUSE12 = 2,                      GHVEG_FARMS12 = 6,           CSA12= 7,               AGRITRSM_OPS12 = 10,
-                             AGRITRSM_OPS12 = 1,                 PCT_DIABETES_ADULTS13 = 9.15,RECFACPTH16 = 0.1169,   PCT_NHWHITE10 = 55.15,
-                             PCT_NHBLACK10 = 14.319,             PCT_HISP10 = 9.725,          PCT_NHNA10 = 0.2303,    PCT_65OLDER10 = 11.155,
-                             PCT_18YOUNGER10 = 23.47,            POVRATE15 = 15.7,            POPLOSS10 = 0
+                             Population_Estimate_2016 = 1625744,  PCT_LACCESS_POP15 = 17.6311, SUPERCPTH16 = 0.0165,
+                             CONVSPTH16 = 0.3583,                 SNAPSPTH12 = 0.7144,         WICSPTH16 = 0.1076,     FFRPTH16 = 0.8482,
+                             FSRPTH16 = 0.7814,                   SODATAX_STORES14 = 6.00,     SODATAX_VENDM14 = 6,    CHIPSTAX_STORES14 = 0,
+                             CHIPSTAX_VENDM14 = 5.150,            PCH_FDPIR_12_15 = 0,         FOOD_TAX14 = 0.5,       METRO13 = 1,
+                             DIRSALES_FARMS12 = 55,               VEG_FARMS12 = 28,            ORCHARD_FARMS12 = 23,   BERRY_FARMS12 = 12,
+                             SLHOUSE12 = 2,                       GHVEG_FARMS12 = 6,           CSA12= 7,               AGRITRSM_OPS12 = 10,
+                             AGRITRSM_OPS12 = 1,                  PCT_DIABETES_ADULTS13 = 9.15,RECFACPTH16 = 0.1169,   PCT_NHWHITE10 = 55.15,
+                             PCT_NHBLACK10 = 14.319,              PCT_HISP10 = 9.725,          PCT_NHNA10 = 0.2303,    PCT_65OLDER10 = 11.155,
+                             PCT_18YOUNGER10 = 23.47,             POVRATE15 = 15.7,            POPLOSS10 = 0
+                             
 
                              ) }) # eventReactive
     output$predvalue = renderText({ predict(train.model.us, users.input()) [[1]] })
