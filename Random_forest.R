@@ -1,9 +1,9 @@
----
-  title: "Random forest"
-author: "Nazleen Khan"
-date: "12/7/2020"
-output: html_document
----
+# ---
+#   title: "Random forest"
+# author: "Nazleen Khan"
+# date: "12/7/2020"
+# output: html_document
+# ---
   
   ## Loading necessary packages
 library(tidyverse)
