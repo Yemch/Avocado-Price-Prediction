@@ -327,7 +327,6 @@ server <- function(input, output) {
                              PCT_NHBLACK10 = 14.319,              PCT_HISP10 = 9.725,          PCT_NHNA10 = 0.2303,    PCT_65OLDER10 = 11.155,
                              PCT_18YOUNGER10 = 23.47,             POVRATE15 = 15.7,            POPLOSS10 = 0
                              
-
                              ) }) # eventReactive
     output$predvalue = renderText({ predict(train.model.us, users.input()) [[1]] })
     
