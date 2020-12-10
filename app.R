@@ -367,7 +367,8 @@ server <- function(input, output) {
                              ) }) # eventReactive
     
     output$predvalue = renderValueBox({ valueBox(subtitle = "Predicted Value", 
-                                                 value = round(predict(train.model.us, newdata = users.input())[[1]]), 3 ) 
+                                                 value = round(  predict(train.model.us, newdata = users.input())[[1]] , 3 ) 
+                                                 ) # valueBox 
       }) # renderValueBox
     
 
