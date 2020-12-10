@@ -7,16 +7,13 @@ library(shinydashboard)
 
 avocado = read.csv("./avocado_clean.csv")
 avocado$Date = as.Date(avocado$Date)
-codebook = readxl::read_excel("./codebook.xlsx") # to get the descriptions of variable codes
-# Get the categorical and continuous variables separately 
-cat_vars = codebook %>% filter(type == "categorical")
-con_vars = codebook %>% filter(type == "continuous") %>% filter(Variable  != "AveragePrice")
+avocado$year = format(as.Date(avocado$Date, format="%d/%m/%Y"),"%Y")
+
 source("./Random_forest.R") # get our random forest prediction model
 avocado$price_pred = predict(train.model.us, newdata = avocado) 
-avocado$year = format(as.Date(avocado$Date, format="%d/%m/%Y"),"%Y")
-avocado_predict = avocado %>% filter(year=="2017")
+avocado_2017_full$pred.2017 = pred.2017 # add the predicted value to the dataset 
 
-  
+codebook = readxl::read_excel("codebook.xlsx")
 
 # Define UI for application that draws a histogram
 ui <- dashboardPage(
@@ -51,7 +48,7 @@ ui <- dashboardPage(
         tabItems(
             # ----- The first page-------
             tabItem(tabName = "basic",
-                    h2("Avovado Prices and Volumns by County Level"),
+                    h2("Avocado Prices and Volumns by County Level"),
                     fluidRow(
                         box(title = "Choose a county",  status = "warning", solidHeader = F,
                             selectInput(inputId = "county", label = "County", choices = avocado$County,  selected = "los angeles"),   
@@ -81,29 +78,38 @@ ui <- dashboardPage(
             
             # ----- The second page-------
             tabItem(tabName = "predictors",
-                    h2("Characteristics of Predictors"),
+                    h2("Model performance"),
                     
                     fluidRow(
-                        box(title = "Select a continuous predictor (see below for descriptions)", status = "warning", solidHeader = F,
-                            selectInput(inputId = "con_predictor", label = "Continuous predictor", choices = con_vars$Variable)
-                            ),  # box
-                        box(title = "Select a categorical predictor (see below for descriptions)", status = "warning", solidHeader = F,
-                            selectInput(inputId = "cat_predictor", label = "Categorical predictor", choices = cat_vars$Variable)
-                            ) # box     
-                    ), #fluidRow
-                    
-                    
-                    
-                    fluidRow(
-                        box(plotOutput(outputId = "line_obs"),
-                            plotOutput(outputId = "line_pred")), 
-                        
-                        box(plotOutput(outputId = "bar_obs"),
-                            plotOutput(outputId = "bar_pred"))
+                      box( title = "Model performance statistics", status = "warning", solidHeader = T, width = 6,
+                      p("MSE in 2017 training dataset: 0.066"),
+                      p("MSE in 2017 testing dataset: 0.072"),
+                      p("Pearson correlation coefficient in 2017 training dataset: 0.834"),
+                      p("Pearson correlation coefficient in 2017 testing dataset: 0.818")
+                      ), # box
+                      
+                      box( title = "Top 10 important predictors identified by Random Forest", status = "warning", width = 6,
+                           plotOutput("gini")
+                      ) # box
+                      
                     ), # fluidRow
-
+                    
                     fluidRow(
-                      box(width=12, tableOutput("var_description"))
+                      box(width = 6, plotOutput("train")), # box
+                      box(width = 6, plotOutput("test") )  # box
+                    ), # fluidRow
+                    
+                    fluidRow(
+                      box(
+                        selectInput("vars", "Select a variable", choices = colnames(avocado_2017)),
+                        br(),br(),br(),
+                        tableOutput("description")
+                        ), # box
+                      
+                      box(title = "Distribution of the variable",
+                          plotOutput("hist")
+                          ) # box
+                      
                     ) # fluidRow
                     
                     ), # tabItem2
@@ -137,12 +143,19 @@ ui <- dashboardPage(
                             br(), br(), br(), br(),
                             valueBoxOutput("predvalue", width = 6)
                             
-                        ) # box 
+                        ), # box 
                         
+                        box(title = "Distribution of predicted avocado price", 
+                            
+                            textOutput("state"),
+                            selectizeInput("county3","Select up to 6 counties:",
+                                           choices = avocado_2017_full$County, options = list(maxItems = 6) ),
+                            
+                            
+                            plotOutput("box")
+                        )
                     ) # fluidRow
  
-                    
-                    
                     ), # tabItem3
             
             
@@ -210,7 +223,7 @@ ui <- dashboardPage(
 server <- function(input, output) {
     
     ### Tab 1 - basic statistics descriptions
-    #reactive
+    # reactive
     plot_y <- reactive({
         if(input$pricevolumn=="AveragePrice"){ plot_y="Avocado Price (Dollar)"}
         else{plot_y="Total Volume of Avocado"}
@@ -287,69 +300,47 @@ server <- function(input, output) {
     
     ### Tab 2 - predictors characteristics
     
-    output$var_description = renderTable({ codebook })
-    
-    output$line_obs = renderPlot({
-      avocado_predict %>% 
-        filter(County=="los angeles"|County=="sacramento"|County=="san diego"|County=="san francisco") %>% 
-        ggplot() +
-        geom_line(aes_string(x=input$con_predictor, y="AveragePrice", color = "County"))+
-        ylim(0.4,3.2) +
-        theme_light() +
-        labs(title ="The Observed Average Price of Avocado in California in 2017 Over the Selected Predictor", 
-             x=input$con_predictor ,y="The Observed Average Price")+
-        scale_color_discrete(labels = c("Los Angeles", "Sacramento", "San Diego", "San Francisco"), name = "County")
-            
+    output$gini = renderPlot({
+      tmp %>% filter(Gini > 4.68) %>%
+        ggplot(aes(x = reorder(feature, Gini), y = Gini)) +
+        geom_bar(stat = 'identity') +
+        coord_flip() + xlab("Predictor") +
+        labs(title = "10 Predictors with the highest Gini scores ") +
+        theme_light()
     })
-    
-    
-    output$line_pred = renderPlot({
-      avocado_predict %>% 
-        filter(County=="los angeles"|County=="sacramento"|County=="san diego"|County=="san francisco") %>% 
-        ggplot() +
-        geom_line(aes_string(x=input$con_predictor, y="price_pred", group="County", color = "County"))+
-        ylim(0.8,2.4) +
-        theme_light() +
-        labs(title="The Predicted Price of Avocado in California in 2017 Over the Selected Predictor", 
-             x=input$con_predictor,y="The Predicted Price")+
-        scale_color_discrete(labels = c("Los Angeles", "Sacramento", "San Diego", "San Francisco"), name = "County")
-        
-    })
-  
-    output$bar_obs = renderPlot({
-      avocado_predict %>%
-        filter(County=="los angeles"|County=="sacramento"|County=="san diego"|County=="san francisco") %>% 
-        ggplot(aes_string(x= input$cat_predictor, y="AveragePrice") )+
-        geom_bar(stat="identity") +
-        coord_flip()+
-        ylim(0.4,3.2) +
-        scale_fill_gradient(low = "lightgoldenrod", high = "darkolivegreen3") + 
-        theme(legend.position = "none", panel.background = element_blank(), axis.line = element_line()) +
-        labs("The Observed Average Price of Avocado in California in 2017 Over the Selected Predictor", 
-             x= input$cat_predictor, y ="The Observed Average Price")
       
+    output$train = renderPlot({
+      train %>% ggplot() +
+        geom_point(aes(x = pred.train, y = AveragePrice), color = "green") +
+        geom_abline(slope = 1, intercept = 0) + 
+        scale_x_continuous(breaks = seq(0, 2.50, 0.25)) + 
+        scale_y_continuous(breaks = seq(0, 3.25, 0.25)) + 
+        xlab("Predicted avocado price in the US 2017 training data (US dollars)") + 
+        ylab("Observed avocado price in the US 2017 training data (US dollars)") + 
+        ggtitle("Observed versus predicted avocado prices in the US 2017 training data")
     })
     
-    output$bar_pred = renderPlot({
-      avocado_predict %>%
-        filter(County=="los angeles"|County=="sacramento"|County=="san diego"|County=="san francisco") %>% 
-        ggplot(aes_string(x= input$cat_predictor, y="price_pred") )+
-        geom_bar(stat="identity") +
-        coord_flip()+
-        ylim(0.8,2.4) +
-        scale_fill_gradient(low = "lightgoldenrod", high = "darkolivegreen3") + 
-        theme(legend.position = "none", panel.background = element_blank(), axis.line = element_line()) +
-        labs(title ="The Predicted Price of Avocado in California in 2017 Over the Selected Predictor", 
-             x= input$cat_predictor, y ="The Predicted Price")
-      
+    output$test = renderPlot({
+      xTest %>% ggplot() +
+        geom_point(aes(x = pred.test, y = test$AveragePrice), color = "orange") +
+        geom_abline(slope = 1, intercept = 0) + 
+        scale_x_continuous(breaks = seq(0, 2.50, 0.25)) + 
+        scale_y_continuous(breaks = seq(0, 3.25, 0.25)) + 
+        xlab("Predicted avocado price in the US 2017 testing data (US dollars)") + 
+        ylab("Observed avocado price in the US 2017 testing data (US dollars)") + 
+        ggtitle("Observed versus predicted avocado prices in the US 2017 testing data")
     })
     
+    output$description = renderTable({
+      codebook %>% filter(Variable %in% input$vars)
+    })
+    
+    # YOUR CODE HERE
+    output$hist = renderPlot({})
     
     ### Tab 3 - Prediction using users input values
     
     # Make a dataframe for users input 
-
-
 
     users.input = eventReactive(
         input$button, { data.frame(
@@ -373,11 +364,27 @@ server <- function(input, output) {
                              ) }) # eventReactive
     
     output$predvalue = renderValueBox({ valueBox(subtitle = "dollar for one avocado", icon = icon("dollar-sign"),
-                                                 value = round(  predict(train.model.us, newdata = users.input())[[1]] , 3 ) 
-                                                 ) # valueBox 
+                                                 value = round(  predict(train.model.us, newdata = users.input())[[1]] , 3 ) ) # valueBox 
       }) # renderValueBox
     
-
+    output$state = renderText({
+      avo_state = avocado %>% filter(County %in% input$county3)
+      return(unique(avo_state$State) )
+    })
+    
+    output$box = renderPlot({
+      avocado_2017_full %>% 
+        filter(County %in% input$county3) %>%
+        ggplot(aes(x = factor(County), y = pred.2017)) + 
+        scale_y_continuous(breaks = seq(0, 2.50, 0.25)) + 
+        xlab("US county") + 
+        ylab("Predicted avocado price (US dollars)") + 
+        ggtitle("Distribution of predicted avocado price across US counties") + 
+        geom_boxplot(fill = "lightblue", alpha = 0.8) + 
+        theme(axis.text.x = element_text(angle = 90, hjust = 1, size = 12),
+              axis.title.y = element_text(size = 12), plot.title =  element_text(size = 12))
+    })
+    
 } # server
 
 # Run the application 
