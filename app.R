@@ -14,8 +14,7 @@ con_vars = codebook %>% filter(type == "continuous") %>% filter(Variable  != "Av
 source("./Random_forest.R") # get our random forest prediction model
 avocado$price_pred = predict(train.model.us, newdata = avocado) 
 avocado$year = format(as.Date(avocado$Date, format="%d/%m/%Y"),"%Y")
-avocado_predict = avocado%>%
-                  filter(year=="2017")
+avocado_predict = avocado%>% filter(year=="2017")
 
   
 
@@ -85,13 +84,15 @@ ui <- dashboardPage(
                     h2("Characteristics of Predictors"),
                     
                     fluidRow(
-                        box(title = "Select a continuous predictor", status = "warning", solidHeader = F,
-                            selectInput(inputId = "con_predictor", label = "Continuous predictor", choices = con_vars$Description)
+                        box(title = "Select a continuous predictor (see below for descriptions)", status = "warning", solidHeader = F,
+                            selectInput(inputId = "con_predictor", label = "Continuous predictor", choices = con_vars$Variable)
                             ),  # box
-                        box(title = "Select a categorical predictor", status = "warning", solidHeader = F,
-                            selectInput(inputId = "cat_predictor", label = "Categorical predictor", choices = cat_vars$Description)
+                        box(title = "Select a categorical predictor (see below for descriptions)", status = "warning", solidHeader = F,
+                            selectInput(inputId = "cat_predictor", label = "Categorical predictor", choices = cat_vars$Variable)
                             ) # box     
                     ), #fluidRow
+                    
+                    
                     
                     fluidRow(
                         box(plotOutput(outputId = "line_obs"),
@@ -99,8 +100,11 @@ ui <- dashboardPage(
                         
                         box(plotOutput(outputId = "bar_obs"),
                             plotOutput(outputId = "bar_pred"))
-                    ) # fluidRow
+                    ), # fluidRow
 
+                    fluidRow(
+                      box(width=12, tableOutput("var_description"))
+                    ) # fluidRow
                     
                     ), # tabItem2
             
@@ -206,7 +210,7 @@ ui <- dashboardPage(
 
 server <- function(input, output) {
     
-    ###Tab 1 - basic statistics descriptions
+    ### Tab 1 - basic statistics descriptions
     #reactive
     plot_y <- reactive({
         if(input$pricevolumn=="AveragePrice"){ plot_y="Avocado Price (Dollar)"}
@@ -284,14 +288,7 @@ server <- function(input, output) {
     
     ### Tab 2 - predictors characteristics
     
-    con_predictor = reactive({
-        code = codebook %>% filter(input$con_predictor)
-        return(code$Variable)})
-    
-    cat_predictor = reactive({
-        code = codebook %>% filter(input$cat_predictor)
-        return(code$Variable)})
-    
+    output$var_description = renderTable({ codebook })
     
     output$line_obs = renderPlot({
       avocado_predict %>% 
@@ -300,7 +297,8 @@ server <- function(input, output) {
         geom_line(aes_string(x=input$con_predictor, y="AveragePrice", color = "County"))+
         ylim(0.4,3.2) +
         theme_light() +
-        labs(title = paste("The Observed Average Price of Avocado in California in 2017 Over",con_predictor()), x=con_predictor(),y="The Observed Average Price")
+        labs(title = paste("The Observed Average Price of Avocado in California in 2017 Over",input$con_predictor), 
+             x=input$con_predictor ,y="The Observed Average Price")
             
     })
     
@@ -312,7 +310,8 @@ server <- function(input, output) {
         geom_line(aes_string(x=input$con_predictor, y="price_pred", group="County", color = "County"))+
         ylim(0.8,2.4) +
         theme_light() +
-        labs(title=paste("The Predicted Price of Avocado in California in 2017 Over",con_predictor()), x=con_predictor(),y="The Predicted Price")
+        labs(title=paste("The Predicted Price of Avocado in California in 2017 Over", input$con_predictor), 
+             x=input$con_predictor,y="The Predicted Price")
         
     })
     
@@ -324,7 +323,8 @@ server <- function(input, output) {
         ylim(0.4,3.2) +
         scale_fill_gradient(low = "lightgoldenrod", high = "darkolivegreen3") + 
         theme(legend.position = "none", panel.background = element_blank(), axis.line = element_line()) +
-        labs(title = paste("The Observed Average Price of Avocado in California in 2017 Over",cat_predictor()), x=cat_predictor(),y="The Observed Average Price")
+        labs(title = paste("The Observed Average Price of Avocado in California in 2017 Over", input$cat_predictor), 
+             x= input$cat_predictor, y ="The Observed Average Price")
       
     })
     
@@ -336,7 +336,8 @@ server <- function(input, output) {
         ylim(0.8,2.4) +
         scale_fill_gradient(low = "lightgoldenrod", high = "darkolivegreen3") + 
         theme(legend.position = "none", panel.background = element_blank(), axis.line = element_line()) +
-        labs(title = paste("The Predicted Price of Avocado in California in 2017 Over",cat_predictor()), x=cat_predictor(),y="The Predicted Price")
+        labs(title = paste("The Predicted Price of Avocado in California in 2017 Over", input$cat_predictor), 
+             x= input$cat_predictor, y ="The Predicted Price")
         
     })
     
