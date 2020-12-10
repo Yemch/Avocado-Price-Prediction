@@ -124,8 +124,8 @@ ui <- dashboardPage(
                         
                         box(title = "Output", status = "warning", solidHeader = T,
                             actionButton("button", "Predict Now", class = "btn-primary btn-lg"),
-                            textOutput('predvalue')
-#                            valueBoxOutput("valueBox"),
+#                            textOutput('predvalue')
+                            valueBoxOutput("predvalue")
 #                            tableOutput("test")
                             
                         ) # box 
@@ -311,10 +311,10 @@ server <- function(input, output) {
     users.input = eventReactive(
         input$button, { data.frame(
                              type = input$type, 
-                             Total.Bags = input$totalbags,        Total.Volume = input$totalvolunm,
-                             PCT_NHASIAN10 = input$asian,         PCT_NHPI10 = input$Hawaiian,
-                             PC_FFRSALES12 = input$PC_FFRSALES12, County = input$county2,
-                             SPECSPTH16 = input$SPECSPTH1,        GROCPTH16 = input$GROCPTH16,
+                             Total.Bags = input$totalbags,        Total.Volume =  input$totalvolumn,
+                             PCT_NHASIAN10 = input$asian,         PCT_NHPI10 =    input$Hawaiian,
+                             PC_FFRSALES12 = input$PC_FFRSALES12, County =        input$county2,
+                             SPECSPTH16 = input$SPECSPTH1,        GROCPTH16 =     input$GROCPTH16,
                              MEDHHINC15 = input$MEDHHINC15,       PC_FSRSALES12 = input$PC_FSRSALES12,
 
                              Population_Estimate_2016 = 1625744,  PCT_LACCESS_POP15 = 17.6311, SUPERCPTH16 = 0.0165,
@@ -328,7 +328,11 @@ server <- function(input, output) {
                              PCT_18YOUNGER10 = 23.47,             POVRATE15 = 15.7,            POPLOSS10 = 0
                              
                              ) }) # eventReactive
-    output$predvalue = renderText({ predict(train.model.us, users.input()) [[1]] })
+    
+    output$predvalue = renderValueBox({ valueBox(predict(train.model.us, newdata = dt)[[1]] ) }) # renderValueBox
+    
+    #output$predvalue = renderText({ users.input() })
+    #output$predvalue = renderText({ predict(train.model.us, users.input()) [[1]] })
     
     #####
     # output$valueBox = renderValueBox({ 
@@ -354,7 +358,7 @@ server <- function(input, output) {
     #         
     #     ))
     #     
-    #     valueBox(predict(train.model.us, newdata = dt)[1] ) }) # renderValueBox
+    #     
     
     
 } # server
