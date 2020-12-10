@@ -124,8 +124,8 @@ ui <- dashboardPage(
                         
                         box(title = "Output", status = "warning", solidHeader = T,
                             actionButton("button", "Predict Now", class = "btn-primary btn-lg"),
-#                            textOutput('predvalue')
-                            valueBoxOutput("predvalue")
+                            textOutput('predvalue')
+#                            valueBoxOutput("predvalue")
 #                            tableOutput("test")
                             
                         ) # box 
@@ -329,10 +329,11 @@ server <- function(input, output) {
                              
                              ) }) # eventReactive
     
-    output$predvalue = renderValueBox({ valueBox(predict(train.model.us, newdata = dt)[[1]] ) }) # renderValueBox
+    #output$predvalue = renderValueBox({ valueBox(predict(train.model.us, newdata = dt)[[1]] ) }) # renderValueBox
     
-    #output$predvalue = renderText({ users.input() })
+    output$predvalue = renderText({ users.input() })
     #output$predvalue = renderText({ predict(train.model.us, users.input()) [[1]] })
+    
     
     #####
     # output$valueBox = renderValueBox({ 
