@@ -296,8 +296,9 @@ server <- function(input, output) {
         geom_line(aes_string(x=input$con_predictor, y="AveragePrice", color = "County"))+
         ylim(0.4,3.2) +
         theme_light() +
-        labs(title = paste("The Observed Average Price of Avocado in California in 2017 Over",input$con_predictor), 
-             x=input$con_predictor ,y="The Observed Average Price")
+        labs(title ="The Observed Average Price of Avocado in California in 2017 Over the Selected Predictor", 
+             x=input$con_predictor ,y="The Observed Average Price")+
+        scale_color_discrete(labels = c("Los Angeles", "Sacramento", "San Diego", "San Francisco"), name = "County")
             
     })
     
@@ -309,35 +310,38 @@ server <- function(input, output) {
         geom_line(aes_string(x=input$con_predictor, y="price_pred", group="County", color = "County"))+
         ylim(0.8,2.4) +
         theme_light() +
-        labs(title=paste("The Predicted Price of Avocado in California in 2017 Over", input$con_predictor), 
-             x=input$con_predictor,y="The Predicted Price")
+        labs(title="The Predicted Price of Avocado in California in 2017 Over the Selected Predictor", 
+             x=input$con_predictor,y="The Predicted Price")+
+        scale_color_discrete(labels = c("Los Angeles", "Sacramento", "San Diego", "San Francisco"), name = "County")
         
     })
-    
+  
     output$bar_obs = renderPlot({
       avocado_predict %>%
-        ggplot(aes_string(x= input$cat_predictor, y="AveragePrice", fill ="AveragePrice") )+
+        filter(County=="los angeles"|County=="sacramento"|County=="san diego"|County=="san francisco") %>% 
+        ggplot(aes_string(x= input$cat_predictor, y="AveragePrice") )+
         geom_bar(stat="identity") +
         coord_flip()+
         ylim(0.4,3.2) +
         scale_fill_gradient(low = "lightgoldenrod", high = "darkolivegreen3") + 
         theme(legend.position = "none", panel.background = element_blank(), axis.line = element_line()) +
-        labs(title = paste("The Observed Average Price of Avocado in California in 2017 Over", input$cat_predictor), 
+        labs("The Observed Average Price of Avocado in California in 2017 Over the Selected Predictor", 
              x= input$cat_predictor, y ="The Observed Average Price")
       
     })
     
     output$bar_pred = renderPlot({
       avocado_predict %>%
-        ggplot(aes_string(x= input$cat_predictor, y="price_pred", fill ="price_pred") )+
+        filter(County=="los angeles"|County=="sacramento"|County=="san diego"|County=="san francisco") %>% 
+        ggplot(aes_string(x= input$cat_predictor, y="price_pred") )+
         geom_bar(stat="identity") +
         coord_flip()+
         ylim(0.8,2.4) +
         scale_fill_gradient(low = "lightgoldenrod", high = "darkolivegreen3") + 
         theme(legend.position = "none", panel.background = element_blank(), axis.line = element_line()) +
-        labs(title = paste("The Predicted Price of Avocado in California in 2017 Over", input$cat_predictor), 
+        labs(title ="The Predicted Price of Avocado in California in 2017 Over the Selected Predictor", 
              x= input$cat_predictor, y ="The Predicted Price")
-        
+      
     })
     
     
