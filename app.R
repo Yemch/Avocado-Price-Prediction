@@ -41,7 +41,7 @@ ui <- dashboardPage(
     dashboardSidebar(
         sidebarMenu(
             menuItem("Basic", tabName = "basic", icon = icon("star")), # menuItem1
-            menuItem("Predictors", tabName = "predictors", icon = icon("bar-chart-o")),
+            menuItem("Model Performance", tabName = "predictors", icon = icon("bar-chart-o")),
             menuItem("Price Prediction", tabName = "prediction", icon = icon("dollar-sign")),
             menuItem("About", tabName = "about", icon = icon("address-card") )
             
@@ -63,7 +63,7 @@ ui <- dashboardPage(
                         
                         box(title = "Choose price or volumn", status = "warning", solidHeader = F,
                             radioButtons(inputId = "pricevolumn", label = NULL, choices = c("Price"="AveragePrice","Volume"="Total.Volume")), 
-                            selectInput(inputId = "date", label = "Date", choices = avocado$Date)
+                            selectInput(inputId = "date", label = "Date", choices = avocado$Date, selected = "2015-01-04")
                             ) # box
                         
                     ), # fluidRow
