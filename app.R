@@ -15,6 +15,12 @@ avocado_2017_full$pred.2017 = pred.2017 # add the predicted value to the dataset
 
 codebook = readxl::read_excel("codebook.xlsx")
 
+top10_predictor = avocado[c("Total.Bags", "Total.Volume", 
+                                 "type","PCT_NHASIAN10",
+                                 "PCT_NHPI10","PC_FFRSALES12",
+                                 "SPECSPTH16","GROCPTH16",
+                                 "MEDHHINC15","PC_FSRSALES12")]
+
 # Define UI for application that draws a histogram
 ui <- dashboardPage(
     
@@ -101,7 +107,7 @@ ui <- dashboardPage(
                     
                     fluidRow(
                       box(
-                        selectInput("vars", "Select a variable", choices = colnames(avocado_2017)),
+                        selectInput("vars", "Select a variable", choices = colnames(top10_predictor)),
                         br(),br(),br(),
                         tableOutput("description")
                         ), # box
@@ -252,7 +258,8 @@ server <- function(input, output) {
         geom_line(aes_string(x="Date", y=input$pricevolumn, group="County"), color = "darkolivegreen4")+
         ylim(0,ylimit_org()) +
         theme_light() +
-        scale_x_date(date_breaks = "3 month", date_labels = "%b") +
+        scale_x_date(date_breaks = "3 month", date_labels = "%Y (%b)") +
+        theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
         labs(title = paste(title(),"(Organic) Over Time"), y=plot_y())
     }) 
     
@@ -263,7 +270,8 @@ server <- function(input, output) {
             geom_line(aes_string(x="Date", y=input$pricevolumn, group="County"), color = "darkolivegreen4")+ 
             ylim(0,ylimit_con()) +
             theme_light() +
-            scale_x_date(date_breaks = "3 month", date_labels = "%b") +
+            scale_x_date(date_breaks = "3 month", date_labels = "%Y (%b)") +
+            theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
             labs(title = paste(title(),"(Conventional) Over Time"), y=plot_y())
     }) 
   
@@ -302,41 +310,60 @@ server <- function(input, output) {
     
     output$gini = renderPlot({
       tmp %>% filter(Gini > 4.68) %>%
-        ggplot(aes(x = reorder(feature, Gini), y = Gini)) +
+        ggplot(aes(x = reorder(feature, Gini), y = Gini, fill=Gini)) +
         geom_bar(stat = 'identity') +
-        coord_flip() + xlab("Predictor") +
+        coord_flip() + 
+        xlab("") +
+        theme(legend.position = "none") +
+        scale_fill_gradient(low = "lightgoldenrod", high = "darkolivegreen3") +
         labs(title = "10 Predictors with the highest Gini scores ") +
+        scale_x_discrete(labels = c("Predictor", "Total.Bags" = "Total Bags",
+                                           "Total.Volume" = "Total Volume", 
+                                           "type" = "Type",
+                                           "PCT_NHASIAN10" = "%Asian(2010)",
+                                           "PCT_NHPI10" = "%Hawaiian/Pacific Islander(2010)",
+                                           "PC_FFRSALES12"="Fast Food Expenditures per capita(2012)",
+                                           "SPECSPTH16"="Specialized Food Stores/1,000 pop(2016)",
+                                           "GROCPTH16"="Grocery Stores/1,000 pop(2016)",
+                                           "MEDHHINC15"="Median Household Income(2015)",
+                                            "PC_FSRSALES12"="restaurants Expenditures per capita(2012)"))+
         theme_light()
     })
       
     output$train = renderPlot({
       train %>% ggplot() +
-        geom_point(aes(x = pred.train, y = AveragePrice), color = "green") +
+        geom_point(aes(x = pred.train, y = AveragePrice), color = "darkolivegreen3") +
         geom_abline(slope = 1, intercept = 0) + 
         scale_x_continuous(breaks = seq(0, 2.50, 0.25)) + 
         scale_y_continuous(breaks = seq(0, 3.25, 0.25)) + 
-        xlab("Predicted avocado price in the US 2017 training data (US dollars)") + 
-        ylab("Observed avocado price in the US 2017 training data (US dollars)") + 
-        ggtitle("Observed versus predicted avocado prices in the US 2017 training data")
+        xlab("Predicted Avocado Price($)") + 
+        ylab("Observed Avocado Price($)") + 
+        ggtitle("Observed Versus Predicted Avocado Prices in the US 2017 Training Data")
     })
     
     output$test = renderPlot({
       xTest %>% ggplot() +
-        geom_point(aes(x = pred.test, y = test$AveragePrice), color = "orange") +
+        geom_point(aes(x = pred.test, y = test$AveragePrice), color = "lightgoldenrod") +
         geom_abline(slope = 1, intercept = 0) + 
         scale_x_continuous(breaks = seq(0, 2.50, 0.25)) + 
         scale_y_continuous(breaks = seq(0, 3.25, 0.25)) + 
-        xlab("Predicted avocado price in the US 2017 testing data (US dollars)") + 
-        ylab("Observed avocado price in the US 2017 testing data (US dollars)") + 
-        ggtitle("Observed versus predicted avocado prices in the US 2017 testing data")
+        xlab("Predicted Avocado Price($)") + 
+        ylab("Observed Avocado Price($)") + 
+        ggtitle("Observed Versus Predicted Avocado Prices in the US 2017 Testing Data")
     })
     
     output$description = renderTable({
       codebook %>% filter(Variable %in% input$vars)
     })
     
-    # YOUR CODE HERE
-    output$hist = renderPlot({})
+
+    output$hist = renderPlot({
+      top10_predictor %>%
+        ggplot(aes_string(x=input$vars)) + 
+        geom_density(color="darkolivegreen3", fill="lightgoldenrod")+
+        xlab("")+
+        ggtitle(paste("The Density Plot of", input$vars))
+    })
     
     ### Tab 3 - Prediction using users input values
     
