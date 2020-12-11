@@ -156,7 +156,7 @@ ui <- dashboardPage(
                             selectizeInput("county3","Select up to 6 counties:",
                                            choices = avocado_2017_full$County, options = list(maxItems = 6) ),
                             plotOutput("box"),
-                            textOutput("state")
+                            tableOutput("state")
                         )
                     ) # fluidRow
  
@@ -393,9 +393,17 @@ server <- function(input, output) {
                                                  value = round(  predict(train.model.us, newdata = users.input())[[1]] , 4 ) ) # valueBox 
       }) # renderValueBox
     
-    output$state = renderText({
-      avo_state = avocado %>% filter(County %in% input$county3)
-      return(unique(avo_state$State) )
+    output$state = renderTable({
+      avocado_2017_full %>% 
+        filter(County %in% input$county3) %>% 
+        dplyr::select(pred.2017, County, State) %>%
+        group_by(County) %>%
+        mutate("Median(US dollar)" = median(pred.2017)) %>%
+        mutate("IQR (US dollar)" = IQR(pred.2017)) %>%
+        mutate("Q1 (US dollar)" = quantile(pred.2017, 0.25)) %>%
+        mutate("Q3 (US dollar)" = quantile(pred.2017, 0.75)) %>%
+        dplyr::select(-pred.2017) %>%
+        distinct()
     })
     
     output$box = renderPlot({
