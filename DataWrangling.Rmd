@@ -90,8 +90,6 @@ avocado = avocado %>%
   filter(Include == 1) %>%
   dplyr::select(-X,-Include) # remove the first column
 
-avocado$County1 = ifelse(avocado$region == "Roanoke", "ROANOKE", avocado$County1 )
-avocado$County1 = ifelse(avocado$region == "StLouis", "STLOUIS", avocado$County1 )
 ```
 
 # 2. Food Environment Atlas Data Cleaning

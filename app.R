@@ -8,7 +8,7 @@ library(shinydashboard)
 avocado = read.csv("./avocado_clean.csv")
 avocado$Date = as.Date(avocado$Date)
 avocado$year = format(as.Date(avocado$Date, format="%d/%m/%Y"),"%Y")
-
+avocado = avocado %>% filter(County != "roanoke") # This county is removed because there are different values of predictors in food atlas data
 source("./Random_forest.R") # get our random forest prediction model
 avocado$price_pred = predict(train.model.us, newdata = avocado) 
 avocado_2017_full$pred.2017 = pred.2017 # add the predicted value to the dataset 
@@ -106,13 +106,13 @@ ui <- dashboardPage(
                     ), # fluidRow
                     
                     fluidRow(
-                      box(
-                        selectInput("vars", "Select a variable", choices = colnames(top10_predictor)),
+                      box(title = "Distribution of the top 10 predictors",
+                        selectInput("vars", "Select a predictor", choices = colnames(top10_predictor)),
                         br(),br(),br(),
                         tableOutput("description")
                         ), # box
                       
-                      box(title = "Distribution of the variable",
+                      box(title = "Distribution of the predictor",
                           plotOutput("hist")
                           ) # box
                       
@@ -333,7 +333,7 @@ server <- function(input, output) {
     output$train = renderPlot({
       train %>% ggplot() +
         geom_point(aes(x = pred.train, y = AveragePrice), color = "darkolivegreen3") +
-        geom_abline(slope = 1, intercept = 0) + 
+        geom_abline(slope = 1, intercept = 0, linetype = "dashed") + 
         scale_x_continuous(breaks = seq(0, 2.50, 0.25)) + 
         scale_y_continuous(breaks = seq(0, 3.25, 0.25)) + 
         xlab("Predicted Avocado Price($)") + 
@@ -343,8 +343,8 @@ server <- function(input, output) {
     
     output$test = renderPlot({
       xTest %>% ggplot() +
-        geom_point(aes(x = pred.test, y = test$AveragePrice), color = "lightgoldenrod") +
-        geom_abline(slope = 1, intercept = 0) + 
+        geom_point(aes(x = pred.test, y = test$AveragePrice), color = "goldenrod1") +
+        geom_abline(slope = 1, intercept = 0, linetype = "dashed") + 
         scale_x_continuous(breaks = seq(0, 2.50, 0.25)) + 
         scale_y_continuous(breaks = seq(0, 3.25, 0.25)) + 
         xlab("Predicted Avocado Price($)") + 
@@ -391,7 +391,7 @@ server <- function(input, output) {
                              ) }) # eventReactive
     
     output$predvalue = renderValueBox({ valueBox(subtitle = "dollar for one avocado", icon = icon("dollar-sign"),
-                                                 value = round(  predict(train.model.us, newdata = users.input())[[1]] , 3 ) ) # valueBox 
+                                                 value = round(  predict(train.model.us, newdata = users.input())[[1]] , 4 ) ) # valueBox 
       }) # renderValueBox
     
     output$state = renderText({
