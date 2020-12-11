@@ -145,6 +145,7 @@ ui <- dashboardPage(
                         
 
                         box(title = "Output", status = "warning", solidHeader = T,
+                            p("Please select a county and the type of avocado"),
                             actionButton("button", "Predict Now"),
                             br(), br(), br(), br(),
                             valueBoxOutput("predvalue", width = 6)
@@ -311,13 +312,12 @@ server <- function(input, output) {
       tmp %>% filter(Gini > 4.68) %>%
         ggplot(aes(x = reorder(feature, Gini), y = Gini, fill=Gini)) +
         geom_bar(stat = 'identity') +
-        coord_flip() + 
-        xlab("") +
+        coord_flip() +
         theme(legend.position = "none") +
         scale_fill_gradient(low = "lightgoldenrod", high = "darkolivegreen3") +
-        labs(title = "10 Predictors with the highest Gini scores ") +
+        labs(title = "10 Predictors with the highest Gini scores ", x="") +
         scale_x_discrete(labels = c("Predictor", "Total.Bags" = "Total Bags",
-                                           "Total.Volume" = "Total Volume", 
+                                           "Total.Volume" = "Total Volume",
                                            "type" = "Type",
                                            "PCT_NHASIAN10" = "%Asian(2010)",
                                            "PCT_NHPI10" = "%Hawaiian/Pacific Islander(2010)",
@@ -325,8 +325,7 @@ server <- function(input, output) {
                                            "SPECSPTH16"="Specialized Food Stores/1,000 pop(2016)",
                                            "GROCPTH16"="Grocery Stores/1,000 pop(2016)",
                                            "MEDHHINC15"="Median Household Income(2015)",
-                                            "PC_FSRSALES12"="restaurants Expenditures per capita(2012)"))+
-        theme_light()
+                                            "PC_FSRSALES12"="restaurants Expenditures per capita(2012)"))
     })
       
     output$train = renderPlot({
@@ -398,7 +397,7 @@ server <- function(input, output) {
         filter(County %in% input$county3) %>% 
         dplyr::select(pred.2017, County, State) %>%
         group_by(County) %>%
-        mutate("Median(US dollar)" = median(pred.2017)) %>%
+        mutate("Median (US dollar)" = median(pred.2017)) %>%
         mutate("IQR (US dollar)" = IQR(pred.2017)) %>%
         mutate("Q1 (US dollar)" = quantile(pred.2017, 0.25)) %>%
         mutate("Q3 (US dollar)" = quantile(pred.2017, 0.75)) %>%
