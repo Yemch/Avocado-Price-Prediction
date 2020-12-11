@@ -57,13 +57,13 @@ ui <- dashboardPage(
                     h2("Avocado Prices and Volumns by County Level"),
                     fluidRow(
                         box(title = "Choose a county",  status = "warning", solidHeader = F,
-                            selectInput(inputId = "county", label = "County", choices = avocado$County,  selected = "los angeles"),   
+                            selectInput(inputId = "county", label = "County", choices = unique(avocado$County),  selected = "los angeles"),   
                             uiOutput("select")
                             ), # box 
                         
                         box(title = "Choose price or volumn", status = "warning", solidHeader = F,
                             radioButtons(inputId = "pricevolumn", label = NULL, choices = c("Price"="AveragePrice","Volume"="Total.Volume")), 
-                            selectInput(inputId = "date", label = "Date", choices = avocado$Date, selected = "2015-01-04")
+                            selectInput(inputId = "date", label = "Date", choices = unique(avocado$Date), selected = "2015-01-04")
                             ) # box
                         
                     ), # fluidRow
@@ -129,8 +129,8 @@ ui <- dashboardPage(
                     
                     fluidRow(
                         box(title = "Input the values of predictors:", status = "warning", solidHeader = T, width = 5,
-                            selectInput("county2",         "County", choices = avocado$County,  selected = "los angeles"),
-                            selectInput("type",            "Type of avocado, conventional or organic:", choices = avocado$type),
+                            selectInput("county2",         "County", choices = unique(avocado$County),  selected = "los angeles"),
+                            selectInput("type",            "Type of avocado, conventional or organic:", choices = unique(avocado$type), selected = "conventional"),
                             # The initial values are chosen as median
                             numericInput("totalbags",      "Total number of bags of avocados sold:", value = 21270),
                             numericInput("totalvolumn",    "Total number of avocados sold:", value = 61554),
@@ -145,7 +145,6 @@ ui <- dashboardPage(
                         
 
                         box(title = "Output", status = "warning", solidHeader = T,
-                            p("Please select a county and the type of avocado"),
                             actionButton("button", "Predict Now"),
                             br(), br(), br(), br(),
                             valueBoxOutput("predvalue", width = 6)
@@ -277,7 +276,7 @@ server <- function(input, output) {
     #volume/price in different counties at a certain time point (barplot)
     output$bar_org <- renderPlot({
     
-    avocado = avocado %>% filter(Date %in% as.Date(input$date)) %>% filter(type == "organic")
+    avocado = avocado %>% filter(Date %in% as.Date(input$date, format = "%Y-%m-%d")) %>% filter(type == "organic")
     avocado$County = reorder(avocado$County, avocado[,input$pricevolumn]) 
     
     avocado %>%
@@ -292,7 +291,7 @@ server <- function(input, output) {
     
     output$bar_con <- renderPlot({
         
-        avocado = avocado %>% filter(Date %in% as.Date(input$date)) %>% filter(type == "conventional")
+        avocado = avocado %>% filter(Date %in% as.Date(input$date, format = "%Y-%m-%d")) %>% filter(type == "conventional")
         avocado$County = reorder(avocado$County, avocado[,input$pricevolumn]) 
         
         avocado %>%
