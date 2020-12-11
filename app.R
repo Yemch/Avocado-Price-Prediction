@@ -153,12 +153,10 @@ ui <- dashboardPage(
                         
                         box(title = "Distribution of predicted avocado price", 
                             
-                            textOutput("state"),
                             selectizeInput("county3","Select up to 6 counties:",
                                            choices = avocado_2017_full$County, options = list(maxItems = 6) ),
-                            
-                            
-                            plotOutput("box")
+                            plotOutput("box"),
+                            textOutput("state")
                         )
                     ) # fluidRow
  
@@ -301,6 +299,7 @@ server <- function(input, output) {
             geom_bar(stat="identity") +
             coord_flip() +
             ylim(0,ylimit_con()) +
+            scale_y_continuous(labels = function(x) format(x, scientific = FALSE) ) + 
             scale_fill_gradient(low = "lightgoldenrod", high = "darkolivegreen3") + 
             theme(legend.position = "none", panel.background = element_blank(), axis.line = element_line()) +
             labs(title=paste(title(),"(Conventional) on", input$date), y=plot_y())
