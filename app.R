@@ -169,7 +169,7 @@ ui <- dashboardPage(
             tabItem(tabName = "about",
                     
                     h2("About"), 
-                    h4("Authors: Group 6 - Chuanjie Deng, Mingchen Ye, Nazleen Khan"),
+                    h4("Authors: Group 6 - Mingchen Ye, Monica Deng, Nazleen Khan"),
                     br(),
                     
                     h3("Background and Motivation"),
@@ -196,10 +196,12 @@ ui <- dashboardPage(
                     
                     HTML("<p>The avocado volumes and prices data are collected from Kaggle, 
                     which is compiled from the Hass Avocado Board website and includes these variables across various metropolitan areas of the US. 
-                    We can download the data in .csv format directly from <a href = 'https://www.kaggle.com/neuromusic/avocado-prices'>here</a>. 
+                    We can download the data in .csv format directly from 
+                    <a href = 'https://www.kaggle.com/neuromusic/avocado-prices'>here</a>. 
                     We combine a Food Environment Atlas dataset that includes up to 280 variables related to the food environment and socioeconomic characteristics of all US counties, 
                     which comes from the US Department of Agriculture website. 
-                    The data can be downloaded in .xls format from <a href='https://www.ers.usda.gov/data-products/food-environment-atlas/data-access-and-documentation-downloads/'>here</a>.</p>"),
+                    The data can be downloaded in .xls format from 
+                         <a href='https://www.ers.usda.gov/data-products/food-environment-atlas/data-access-and-documentation-downloads/'>here</a>.</p>"),
 
                     br(),
                     
