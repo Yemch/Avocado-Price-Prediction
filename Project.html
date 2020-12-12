@@ -441,7 +441,7 @@ summary {
 </div>
 <div id="data-wrangling" class="section level1">
 <h1>Data Wrangling</h1>
-<p>This part is for the data wrangling process. We first cleaned the <code>avocado.csv</code> with unclear region descriptions and restricted the data only at city level. Since avocado prices data is mainly at city level and the Food Environment Atlas datasets are at county level, we created a new dataset <code>Cities-Counties-States.xlsx</code> mannualy for linking the cities to counties. After that, we merged prices data and food environment data together by the same county in the same state. Finally, a cleaned version of data is outputed as <code>avocado_clean.csv</code>.</p>
+<p>This part is for the data wrangling process. We first cleaned the <code>avocado.csv</code> with unclear region descriptions and restricted the data only at city level. Since avocado prices data is mainly at city level and the Food Environment Atlas datasets are at county level, we created a new dataset <code>Cities-Counties-States.xlsx</code> mannually for linking the cities to counties. After that, we merged prices data and food environment data together by the same county in the same state. Finally, a cleaned version of data is outputed as <code>avocado_clean.csv</code>.</p>
 <pre class="r"><code>library(tidyverse)</code></pre>
 <pre><code>## ── Attaching packages ─────────────────────────────────────── tidyverse 1.3.0 ──</code></pre>
 <pre><code>## ✓ ggplot2 3.3.2     ✓ purrr   0.3.4
