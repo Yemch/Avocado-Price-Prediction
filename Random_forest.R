@@ -69,7 +69,7 @@ pred.train = predict(train.model.us, newdata = train)
 head(pred.train)
 train %>% ggplot() +
   geom_point(aes(x = pred.train, y = AveragePrice), color = "green") +
-  geom_abline(slope = 1, intercept = 0) + 
+  geom_abline(slope = 1) + 
   scale_x_continuous(breaks = seq(0, 2.50, 0.25)) + 
   scale_y_continuous(breaks = seq(0, 3.25, 0.25)) + 
   xlab("Predicted avocado price in the US 2017 training data (US dollars)") + 
@@ -86,7 +86,7 @@ pred.test = predict(train.model.us, newdata = xTest)
 head(pred.test)
 xTest %>% ggplot() +
   geom_point(aes(x = pred.test, y = test$AveragePrice), color = "orange") +
-  geom_abline(slope = 1, intercept = 0) + 
+  geom_abline(slope = 1) + 
   scale_x_continuous(breaks = seq(0, 2.50, 0.25)) + 
   scale_y_continuous(breaks = seq(0, 3.25, 0.25)) + 
   xlab("Predicted avocado price in the US 2017 testing data (US dollars)") + 
