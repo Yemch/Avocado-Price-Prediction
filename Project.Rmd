@@ -1,0 +1,368 @@
+---
+title: "Project"
+author: "Mingchen Ye, Monica Deng, Nazleen Khan"
+date: "12/12/2020"
+output: html_document
+---
+
+# Project Introduction
+
+### Overview and Motivation
+
+The US demand for avocados has increased substantially since the 1980s (Carman HF, 2018). As a healthy superfood, avocados can be easily incorporated into several meals to meet the requirements for daily intake of fiber, potassium, and monounsaturated fatty acids (Carman HF, 2018). If high demand for avocados leads to more competitive pricing, individuals in certain areas may not be able to incorporate avocados into their diets. We propose a US county-level descriptive analysis of avocado prices in comparison with food environment characteristics. 
+
+We will also use these and related variables to predict avocado prices across 29 counties in the US with a diverse range of food environments. Our goal is to use this algorithm to predict avocado prices to (1) provide context for area-specific food choices and (2) offer information on locations where avocados may be more reasonably priced.
+
+### Project Goal
+
+Our project will :
+
+- describe avocado prices and volumes between different US counties and changes over time (2015-2018).
+
+- predict avocado prices using variables such as race percentage, median household income, access and proximity to grocery stores, and food purchasing assistance across 29 US counties.
+
+### Data Sources and Data Wrangling
+
+The avocado volumes and prices data are collected from Kaggle, which is compiled from the Hass Avocado Board website and includes these variables across various metropolitan areas of the US. We can download the data in .csv format directly. We combine a Food Environment Atlas dataset that includes up to 280 variables related to the food environment and socioeconomic characteristics of all US counties, which comes from the US Department of Agriculture website. The data can be downloaded in .xls format. The following links are the sources of data:
+
+https://www.kaggle.com/neuromusic/avocado-prices
+
+https://www.ers.usda.gov/data-products/food-environment-atlas/data-access-and-documentation-downloads/
+
+In the first part of this Rmd, you can find the process of data wrangling.
+
+### Exploratory Analysis (Analysis 1)
+
+We explore and illustrate the trend of avocado average prices and total volumes over time (2015-2018) by US counties, and compare them across US counties given a time point. The results of this part are on the "Basic" tab on the Shiny app. 
+
+Users can plot changes in average price or total volume of two types of avocados (conventional and organic) across time (2015-2018) for a specific county. 
+
+The bar plots are designed to show the average price or total volume of two types of avocados (conventional and organic) for all US counties with available data on a specific date.
+
+### Price Prediction by Machine Learning: Random Forest (Analysis 2)
+
+*Methods*
+
+We chose the random forest algorithm to predict the average avocado price in US counties in 2017. Random forest is an extension of regression trees, which predict an outcome variable by partitioning the predictor space and estimating the mean (predicted) outcome within each data partition. Rather than constructing a single decision tree, random forest incorporates repeated sampling with replacement of the training dataset (bootstrapping) to construct multiple decision trees that are averaged across each other. This approach improves prediction performance and model stability at the cost of reduced interpretability.
+
+We first restricted the data in 2017. From the 305 potential predictors, we excluded those with > 22% missing rate and those with collinearity based on subject matter knowledge. There are 2,968 observations and 46 predictors remaining in the dataset, including race percentage, median household income, poverty rate, total number of avocados sold, population, etc. After that, there were no missing values in 2017. We randomly split it into training and testing datasets by 7:3 ratio, resulting in 2064 observations and 904 observations, respectively. In the training dataset, we performed random forest (see script below for detailed parameter chosen). The model was fit in the testing data set in order to evaluate the model performance. We compared the mean squared error (MSE), Pearson correlation coefficients, and the plots of observed price against predicted price in the training and testing datasets. In addition, the most important predictors were identified by the highest Gini scores, which are used to evaluate variable importance in random forest regression, with a higher score reflecting greater importance of the variable in predicting the outcome. The model performance results were also displayed in the tab “Model Performance” on the shiny app. 
+
+*Results*
+
+Since a low MSE (close to 0) and high Pearson correlation coefficient (close to -1 or +1) indicate optimal model performance. The MSE in the test set (0.072) is slightly higher than that in the training set (0.066), which is expected since most prediction models perform optimally in the training datasets upon which they are derived. Due to the small difference in MSE between training and test datasets and methodology of the random forest, there is little concern for overfitting. Overall, the MSE in the test set is small and Pearson correlation coefficient is high (0.818), which suggests that the model performs fairly well in predicting county-level avocado price. The two plots of observed versus predicted avocado prices demonstrate the performance of the random forest model in both training and test sets. The closer the points are to the diagonal reference line, the better the observed and predicted prices align with each other. In both plots, the points gather around the reference line. In sum, our model indicates little overfitting and the performance is adequate.
+
+
+We ranked the top 10 predictors in descending order of Gini score. It indicates that the total number of bags of avocados sold (Total.Bags) is the most important predictor of county-level avocado price in the random forest regression model. The total volume of avocados sold (Total.Volume) and the type of avocado (organic or conventional) come second and third place, respectively.
+
+*Limitations*
+
+Our prediction has limitations. First, we only use the data in 2017, so we do not incorporate the calendar time as a predictor. However, avocado prices may change depending on time. Second, given the limited number of US counties from the avocado data, we have limited generalizability of our prediction results to the whole United States. 
+
+### Shiny App (Analysis 3)
+
+We displayed the visualization of exploratory analyses, performance of the prediction model,  information of important predictors, results of the prediction, and overall information of the project on 4 tabs of the Shiny app. Moreover, the app is made to be interactive so that the users can set the variables to the values they want and check the results that they are interested in. In this part, we will mainly describe the layouts and functions of the app. Technical details and interpretations have been explained in the previous parts of Analysis 1 and 2.
+
+The first tab of the Shiny app focuses on descriptive analyses, including basic plots of average prices and total volumes of avocados by US county. 
+
+The second tab contains information on the performance of the random forest regression model used to predict avocado prices across 29 US counties with county-level data from 2017.  The tab also presents the distribution of the top 10 most important variables used for avocado price prediction based on the associated Gini scores. The box on the top left illustrates the performance statistics of the random forest model, including the mean squared error (MSE) and Pearson correlation coefficient between observed and predicted avocado prices in both training and test datasets. The plot "Top 10 Important Predictors Identified by Random Forest" ranks the top 10 predictors in descending order of Gini score. Below that, there are the two plots of observed versus predicted avocado prices in both training and test sets. At the bottom, users can select a variable among the top 10 important predictors and the associated table outputs basic information on the selected variable. The plot on the right-hand side shows the density plot of the predictor.
+
+The third tab applies the results of the random forest regression model to US county-level avocado price prediction. Users can input the values of the top 10 most important predictors (other predictors were set to median values in the code) and press the button "Predict Now", which outputs the predicted price for one avocado in the blue box. Below the blue box, users can select up to 6 counties. The box plot for each county shows the distribution of predicted avocado price, which can help users identify locations where avocados may be more affordable on average. Additional information is printed below the box plots, such as the associated state for each county, median predicted avocado price, and interquartile range of predicted avocado price.
+
+The fourth tab contains overall information of this prediction project, including background and motivation, data sources, and key references.
+
+### Websites
+
+Project website: **The google site**
+GitHub repository: https://github.com/Yemch/Avocado-Price-Prediction
+
+### References:
+
+Carman HF. (2018). The story behind avocados’ rise to prominence in the United States. Giannini Foundation of Agricultural Economics, University of California. Accessed 11/01/2020 at https://s.giannini.ucop.edu/uploads/giannini_public/5c/1f/5c1fa9d0-c5c9-45ce-8606-149ddf4f7397/v22n5_3.pdf.
+
+US Department of Agriculture. (2020). US avocado demand is climbing steadily. Accessed 11/01/2020 at https://www.ers.usda.gov/data-products/chart-gallery/gallery/chart-detail/?chartId=98071.
+
+
+
+
+---------------------
+
+
+---------------------
+
+
+# Data Wrangling
+
+This part is for the data wrangling process. We first cleaned the `avocado.csv` with unclear region descriptions and restricted the data only at city level. Since avocado prices data is mainly at city level and the Food Environment Atlas datasets are at county level, we created a new dataset `Cities-Counties-States.xlsx` mannualy for linking the cities to counties. After that, we merged prices data and food environment data together by the same county in the same state. Finally, a cleaned version of data is outputed as `avocado_clean.csv`.
+
+
+```{r}
+library(tidyverse)
+library(readxl)
+library(purrr)
+```
+
+# 1. Avocado Prices Data Cleaning
+Historical data on avocado prices and sales volume in multiple US markets.
+This data contains the outcome - the average price of a single avocado. The prices are summerised at city-level.
+Source: https://www.kaggle.com/neuromusic/avocado-prices
+
+Some relevant columns in the dataset:
+
+Date - The date of the observation
+AveragePrice - the average price of a single avocado
+type - conventional or organic
+year - the year
+Region - the city or region of the observation
+Total Volume - Total number of avocados sold
+4046 - Total number of avocados with PLU 4046 sold
+4225 - Total number of avocados with PLU 4225 sold
+4770 - Total number of avocados with PLU 4770 sold
+
+```{r}
+avocado = read.csv("./avocado.csv") # avocado price data
+city2county = read_xlsx("./Cities-Counties-States.xlsx") # city to county mapping data
+head(avocado)
+```
+
+```{r}
+summary(avocado)
+```
+
+Keep data with regions at city-level. For regions of combination of two cities such as "BaltimoreWashington", we exclude if two cities have distance greater than 30 miles, because we assume that cities with equal or closer distance of 30 miles have the same avocado prices.
+```{r}
+# Check all the combined cities left
+city2county %>% 
+  filter(Include == 1) %>%
+  filter(!is.na(County2)) 
+
+# Make a new dataset with separate cities
+com = data.frame(Location = c("Hartford","Springfield","Miami","Fort Lauderdale"),
+                 County1= c("HARTFORD","HAMPDEN","MIAMI-DADE","BROWARD"),
+                 County2= NA,
+                 Distance = NA,
+                 State = c("CONNECTICUT","MASSACHUSETTS","FLORIDA","FLORIDA"))
+com
+
+# Drop not useful regions broader than city level (set Include == 1)
+# Remove the rows with combination cities
+# Add cities back separately
+# remove unuseful columns
+city2county = city2county %>%
+  filter(Include == 1) %>%
+  filter(Location != "HartfordSpringfield") %>%
+  filter(Location != "MiamiFtLauderdale") %>%
+  bind_rows(com) %>%
+  dplyr::select(-County2,-Distance)
+
+# Combine price dataset and county data together
+avocado = avocado %>% 
+  left_join(city2county, by = c("region" = "Location")) %>%
+  filter(Include == 1) %>%
+  dplyr::select(-X,-Include) # remove the first column
+
+```
+
+# 2. Food Environment Atlas Data Cleaning
+
+These data are the potential predictors we will be used to predict avocado prices.
+
+Read food environment atlas data. 
+```{r}
+county = read_xlsx("./FoodAtlasData/County.xlsx")
+state = read_xlsx("./FoodAtlasData/State.xlsx")
+access = read_xlsx("./FoodAtlasData/Access.xlsx")
+stores = read_xlsx("./FoodAtlasData/Stores.xlsx")
+restaurants = read_xlsx("./FoodAtlasData/Restaurants.xlsx")
+assistance = read_xlsx("./FoodAtlasData/Assistance.xlsx")
+insecurity = read_xlsx("./FoodAtlasData/Insecurity.xlsx")
+taxes = read_xlsx("./FoodAtlasData/Taxes.xlsx")
+local = read_xlsx("./FoodAtlasData/Local.xlsx")
+health = read_xlsx("./FoodAtlasData/Health.xlsx")
+socioecon = read_xlsx("./FoodAtlasData/SocioEconomic.xlsx")
+
+# remove the last row in local dataset, which is an NA row 
+local = local[1:nrow(local)-1,]
+```
+
+Merge all food environment atlas data together except for state population
+```{r}
+# Combine food environment atlas covariates together (county-level)
+foodatlas = 
+  # Place all tables at county-level into a list
+  list(county, access, stores, restaurants, assistance, insecurity, taxes, local, health, socioecon) %>% 
+  # Use reduce to join together the contents of the list
+  reduce(left_join, by = "FIPS")
+
+# Uncomment this line to check number of NA in each column
+# apply(foodatlas, 2, function(x){sum(is.na(x))})
+
+# remove duplicate columns
+foodatlas = foodatlas %>% 
+  dplyr::select(-State.x.x, -State.x.x.x, -State.x.x.x.x, -State.x.x.x.x.x, -State.y, -State.y.y, -State.y.y.y, -State.y.y.y.y, -State.y.y.y.y.y,
+                -County.x.x, -County.x.x.x, -County.x.x.x.x, -County.x.x.x.x.x, -County.x, -County.y.y, -County.y.y.y, -County.y.y.y.y, -County.y.y.y.y.y)
+```
+
+# 3. Merge two parts together
+```{r}
+# Capitalize all the Counties and States in food environment atlas data
+foodatlas$State.x = toupper(foodatlas$State.x)
+foodatlas$County.y = toupper(foodatlas$County.y)
+
+avocado = avocado %>%
+  left_join(foodatlas, by = c("County1" = "County.y", "State" = "State.x"))
+
+avocado = rename(avocado, County = County1)
+avocado$County = tolower(avocado$County)
+dim(avocado)
+```
+
+```{r}
+write.csv(avocado,"./avocado_clean.csv", row.names = F)
+```
+
+
+-------------
+
+-------------
+
+# Price Prediction by Machine Learing: Random Forest
+
+
+## Loading necessary packages
+```{r}
+library(tidyverse)
+library(gamlr)
+library(Matrix)
+library(lubridate)
+library(randomForest)
+library(MASS)
+library(knitr)
+library(caTools)
+```
+
+## Extending inference to whole United States in 2017
+
+## Pulling in the wrangled data and creating the training and testing datasets
+```{r}
+avocado_clean <- read.csv("avocado_clean.csv") # 10,140 observations of 306 variables
+avocado_2017 <- avocado_clean %>%
+                filter(year == 2017 & County != "roanoke" & County != "stlouis") %>% 
+                dplyr::select(c("AveragePrice", "Total.Volume", "Total.Bags", "type",
+                                   "County", "Population_Estimate_2016", "PCT_LACCESS_POP15",
+                                   "GROCPTH16", "SUPERCPTH16", "CONVSPTH16", "SPECSPTH16",
+                                   "SNAPSPTH12", "WICSPTH16", "FFRPTH16", "FSRPTH16", 
+                                   "PC_FFRSALES12", "PC_FSRSALES12",
+                                   "SODATAX_STORES14", "SODATAX_VENDM14", "CHIPSTAX_STORES14",
+                                   "CHIPSTAX_VENDM14", "PCH_FDPIR_12_15", "FOOD_TAX14", "METRO13",
+                                   "DIRSALES_FARMS12", "VEG_FARMS12", "ORCHARD_FARMS12",
+                                   "BERRY_FARMS12", "SLHOUSE12", "GHVEG_FARMS12", "CSA12",
+                                   "AGRITRSM_OPS12","FARM_TO_SCHOOL15", "PCT_DIABETES_ADULTS13",
+                                   "RECFACPTH16", "PCT_NHWHITE10", "PCT_NHBLACK10", "PCT_HISP10",
+                                   "PCT_NHASIAN10", "PCT_NHNA10", "PCT_NHPI10", "PCT_65OLDER10",
+                                   "PCT_18YOUNGER10", "MEDHHINC15", "POVRATE15", "POPLOSS10"))
+# Exclude Roanoke county and St. Louis because they have missing values across several important predictors
+# Train and test prediction model using 2017 observations 
+# 2,968 observations of 46 variables 
+# Pre-selected variables without substantial missingness or correlation from subject matter knowledge
+set.seed(610)
+sample = sample.split(avocado_2017, SplitRatio = 0.70)
+train = subset(avocado_2017, sample == TRUE)
+test = subset(avocado_2017, sample == FALSE) 
+# Randomly split 2017 data into 70:30 training and testing datasets
+```
+
+## Asessing missing data
+```{r}
+## TRAINING DATASET 
+sapply(train, function(x) sum(is.na(x))) # Number missing by column
+sum(is.na(train)) 
+# 0 missing observations in training dataset
+
+## TESTING DATASET 
+sum(is.na(test)) 
+# 0 missing observations in testing dataset
+xTest <- test %>% dplyr::select(-AveragePrice) 
+# Retain all predictors and exclude outcome variable
+```
+
+## Running random forest in training dataset
+```{r}
+set.seed(1500)  
+train.model.us <- randomForest(AveragePrice ~ ., data = train, mtry = 15, nodesize = 100) 
+# p/3 = 46 predictors/3 = 15 variables tried at each split
+# mtry reduces correlation between trees and improves accuracy
+# nodesize refers to the minimum number of observations at each split
+train.model.us
+```
+
+## Evaluating random forest performance in training and testing datasets
+```{r}
+pred.train = predict(train.model.us, newdata = train)
+head(pred.train)
+train %>% ggplot() +
+          geom_point(aes(x = pred.train, y = AveragePrice), color = "green") +
+          geom_abline(slope = 1, intercept = 0) + 
+          scale_x_continuous(breaks = seq(0, 2.50, 0.25)) + 
+          scale_y_continuous(breaks = seq(0, 3.25, 0.25)) + 
+          xlab("Predicted avocado price in the US 2017 training data (US dollars)") + 
+          ylab("Observed avocado price in the US 2017 training data (US dollars)") + 
+          ggtitle("Observed versus predicted avocado prices in the US 2017 training data")
+# Observed vs. predicted values in 2017 US training dataset 
+
+mean((pred.train - train$AveragePrice)^2) 
+# MSE = 0.066 in 2017 training dataset
+cor.test(as.numeric(pred.train), train$AveragePrice, method = "pearson", conf.level = 0.95)
+# Pearson correlation coefficient = 0.834
+
+pred.test = predict(train.model.us, newdata = xTest)
+head(pred.test)
+xTest %>% ggplot() +
+          geom_point(aes(x = pred.test, y = test$AveragePrice), color = "orange") +
+          geom_abline(slope = 1, intercept = 0) + 
+          scale_x_continuous(breaks = seq(0, 2.50, 0.25)) + 
+          scale_y_continuous(breaks = seq(0, 3.25, 0.25)) + 
+          xlab("Predicted avocado price in the US 2017 testing data (US dollars)") + 
+          ylab("Observed avocado price in the US 2017 testing data (US dollars)") + 
+          ggtitle("Observed versus predicted avocado prices in the US 2017 testing data")
+# Observed vs. predicted values in 2017 testing dataset 
+
+mean((pred.test - test$AveragePrice)^2) 
+# MSE = 0.072 in 2017 testing dataset
+cor.test(as.numeric(pred.test), test$AveragePrice, method = "pearson", conf.level = 0.95)
+# Pearson correlation coefficient = 0.818
+```
+
+## Identifying important predictors
+```{r}
+variable_importance <- importance(train.model.us) 
+tmp <- tibble(feature = rownames(variable_importance),
+                  Gini = variable_importance[,1]) %>%
+                  arrange(desc(Gini))
+kable(tmp[1:10,])
+
+tmp %>% filter(Gini > 4.68) %>%
+        ggplot(aes(x = reorder(feature, Gini), y = Gini)) +
+        geom_bar(stat = 'identity') +
+        coord_flip() + xlab("Predictor") +
+        theme(axis.text = element_text(size = 8))
+```
+
+## Range of avocado price predictions in US in 2017 by county
+
+```{r}
+avocado_2017_full <- avocado_clean %>%
+                     filter(year == 2017 & County != "roanoke" & County != "stlouis") %>% 
+                     dplyr::select(-"AveragePrice")
+pred.2017 = predict(train.model.us, newdata = avocado_2017_full)
+avocado_2017_full %>% ggplot(aes(x = factor(County), y = pred.2017)) + 
+                      scale_y_continuous(breaks = seq(0, 2.50, 0.25)) + 
+                      xlab("US county") + 
+                      ylab("Predicted avocado price (US dollars)") + 
+                      ggtitle("Distribution of predicted avocado price across US counties") + 
+                      geom_boxplot(fill = "lightblue", alpha = 0.8) + 
+                      theme(axis.text.x = element_text(angle = 90, hjust = 1, size = 12),
+                      axis.title.y = element_text(size = 12), plot.title =  element_text(size = 12))
+```
+
+
+
