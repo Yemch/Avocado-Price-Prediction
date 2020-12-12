@@ -1,4 +1,4 @@
-## Descriptive analysis and prediction of avocado prices in the United States (2015-2018)
+## Descriptive Analysis (2015-2018) and Prediction of Avocado Prices in the United States in 2017
 
 Authors: Group 6 - Chuanjie Deng, Mingchen Ye, Nazleen Khan
 
