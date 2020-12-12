@@ -22,7 +22,7 @@ Our screencast can be found [here]().
 - `avocado.csv` is the avocado prices dataset, downloaded from [here](https://www.kaggle.com/neuromusic/avocado-prices)
 - `FoodAtlasData` folder contains Food Environment Atlas datasets, downloaded from [here](https://www.ers.usda.gov/data-products/food-environment-atlas/data-access-and-documentation-downloads/)
 - `avocado_clean.csv` is cleaned and variables merged version of the avocado prices dataset.
-- `Cities-Counties-States.xlsx` is the city to county mapping data: 
+- `Cities-Counties-States.xlsx` is the city to county mapping data.
 - `codebook.xlsx` is the code book for the predictors we used in the model.
 - `Random_Forest.R` is the R file version of the random forest procedure in the `Project.Rmd`. It is made to get the prediction model used in the Shiny app.
 
