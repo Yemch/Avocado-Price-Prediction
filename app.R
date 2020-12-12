@@ -54,7 +54,7 @@ ui <- dashboardPage(
         tabItems(
             # ----- The first page-------
             tabItem(tabName = "basic",
-                    h2("Avocado Prices and Volumns by County Level"),
+                    h2("Avocado Prices and Volumns by County"),
                     fluidRow(
                         box(title = "Choose a county",  status = "warning", solidHeader = F,
                             selectInput(inputId = "county", label = "County", choices = unique(avocado$County),  selected = "los angeles"),   
@@ -88,13 +88,13 @@ ui <- dashboardPage(
                     
                     fluidRow(
                       box( title = "Model performance statistics", status = "warning", solidHeader = T, width = 6,
-                      p("MSE in 2017 training dataset: 0.066"),
+                      p("Mean squared error (MSE) in 2017 training dataset: 0.066"),
                       p("MSE in 2017 testing dataset: 0.072"),
                       p("Pearson correlation coefficient in 2017 training dataset: 0.834"),
                       p("Pearson correlation coefficient in 2017 testing dataset: 0.818")
                       ), # box
                       
-                      box( title = "Top 10 important predictors identified by Random Forest", status = "warning", width = 6,
+                      box( title = "Top 10 Important Predictors Identified by Random Forest", status = "warning", width = 6,
                            plotOutput("gini")
                       ) # box
                       
@@ -106,13 +106,13 @@ ui <- dashboardPage(
                     ), # fluidRow
                     
                     fluidRow(
-                      box(title = "Distribution of the top 10 predictors",
+                      box(title = "Distributions of the Top 10 Predictors",
                         selectInput("vars", "Select a predictor", choices = colnames(top10_predictor)),
                         br(),br(),br(),
                         tableOutput("description")
                         ), # box
                       
-                      box(title = "Distribution of the predictor",
+                      box(title = "Distribution of the Predictor",
                           plotOutput("hist")
                           ) # box
                       
@@ -134,13 +134,13 @@ ui <- dashboardPage(
                             # The initial values are chosen as median
                             numericInput("totalbags",      "Total number of bags of avocados sold:", value = 21270),
                             numericInput("totalvolumn",    "Total number of avocados sold:", value = 61554),
-                            numericInput("asian",          "% Asian in the county:", value = 4.330),
+                            numericInput("asian",          "% Asian:", value = 4.330),
                             numericInput("Hawaiian",       "% Hawaiian or Pacific Islander:", value = 0.056),
-                            numericInput("PC_FFRSALES12",  "Expenditures per capita, fast food, (dollar):",value = 610.0),
+                            numericInput("PC_FFRSALES12",  "Expenditures per capita, fast food, (US dollars):",value = 610.0),
                             numericInput("SPECSPTH16",     "Specialized food stores/1,000 pop:",value = 0.0726),
                             numericInput("GROCPTH16",      "Grocery stores/1,000 pop:", value = 0.1905),
                             numericInput("MEDHHINC15",     "Median household income:", value = 56600),
-                            numericInput("PC_FSRSALES12",  "Expenditures per capita, restaurants, (dollar):", value = 722.6)
+                            numericInput("PC_FSRSALES12",  "Expenditures per capita, restaurants, (US dollars):", value = 722.6)
                         ), # box 
                         
 
@@ -192,7 +192,7 @@ ui <- dashboardPage(
                     
                     br(),
                     
-                    h3("Data Source"),
+                    h3("Data Sources"),
                     
                     p("The avocado volumes and prices data are collected from Kaggle, 
                     which is compiled from the Hass Avocado Board website and includes these variables across various metropolitan areas of the US. 
@@ -229,7 +229,7 @@ server <- function(input, output) {
     ### Tab 1 - basic statistics descriptions
     # reactive
     plot_y <- reactive({
-        if(input$pricevolumn=="AveragePrice"){ plot_y="Avocado Price (Dollar)"}
+        if(input$pricevolumn=="AveragePrice"){ plot_y="Avocado Price (US dollars)"}
         else{plot_y="Total Volume of Avocado"}
     })
     
@@ -314,17 +314,17 @@ server <- function(input, output) {
         coord_flip() +
         theme(legend.position = "none") +
         scale_fill_gradient(low = "lightgoldenrod", high = "darkolivegreen3") +
-        labs(title = "10 Predictors with the highest Gini scores ", x="") +
+        labs(title = "Top 10 predictors with the highest Gini scores ", x="") +
         scale_x_discrete(labels = c("Predictor", "Total.Bags" = "Total Bags",
                                            "Total.Volume" = "Total Volume",
                                            "type" = "Type",
-                                           "PCT_NHASIAN10" = "%Asian(2010)",
-                                           "PCT_NHPI10" = "%Hawaiian/Pacific Islander(2010)",
-                                           "PC_FFRSALES12"="Fast Food Expenditures per capita(2012)",
-                                           "SPECSPTH16"="Specialized Food Stores/1,000 pop(2016)",
-                                           "GROCPTH16"="Grocery Stores/1,000 pop(2016)",
-                                           "MEDHHINC15"="Median Household Income(2015)",
-                                            "PC_FSRSALES12"="restaurants Expenditures per capita(2012)"))
+                                           "PCT_NHASIAN10" = "% Asian (2010)",
+                                           "PCT_NHPI10" = "% Hawaiian/Pacific Islander (2010)",
+                                           "PC_FFRSALES12"="Fast food expenditures per capita (2012)",
+                                           "SPECSPTH16"="Specialized food stores/1,000 pop (2016)",
+                                           "GROCPTH16"="Grocery stores/1,000 pop (2016)",
+                                           "MEDHHINC15"="Median household income (2015)",
+                                            "PC_FSRSALES12"="Restaurants expenditures per capita (2012)"))
     })
       
     output$train = renderPlot({
@@ -333,8 +333,8 @@ server <- function(input, output) {
         geom_abline(slope = 1, intercept = 0, linetype = "dashed") + 
         scale_x_continuous(breaks = seq(0, 2.50, 0.25)) + 
         scale_y_continuous(breaks = seq(0, 3.25, 0.25)) + 
-        xlab("Predicted Avocado Price($)") + 
-        ylab("Observed Avocado Price($)") + 
+        xlab("Predicted Avocado Price (US dollars)") + 
+        ylab("Observed Avocado Price (US dollars)") + 
         ggtitle("Observed Versus Predicted Avocado Prices in the US 2017 Training Data")
     })
     
@@ -344,8 +344,8 @@ server <- function(input, output) {
         geom_abline(slope = 1, intercept = 0, linetype = "dashed") + 
         scale_x_continuous(breaks = seq(0, 2.50, 0.25)) + 
         scale_y_continuous(breaks = seq(0, 3.25, 0.25)) + 
-        xlab("Predicted Avocado Price($)") + 
-        ylab("Observed Avocado Price($)") + 
+        xlab("Predicted Avocado Price (US dollars)") + 
+        ylab("Observed Avocado Price (US dollars)") + 
         ggtitle("Observed Versus Predicted Avocado Prices in the US 2017 Testing Data")
     })
     
@@ -387,7 +387,7 @@ server <- function(input, output) {
                              
                              ) }) # eventReactive
     
-    output$predvalue = renderValueBox({ valueBox(subtitle = "dollar for one avocado", icon = icon("dollar-sign"),
+    output$predvalue = renderValueBox({ valueBox(subtitle = "dollars for one avocado", icon = icon("dollar-sign"),
                                                  value = round(  predict(train.model.us, newdata = users.input())[[1]] , 4 ) ) # valueBox 
       }) # renderValueBox
     
@@ -396,10 +396,10 @@ server <- function(input, output) {
         filter(County %in% input$county3) %>% 
         dplyr::select(pred.2017, County, State) %>%
         group_by(County) %>%
-        mutate("Median (US dollar)" = median(pred.2017)) %>%
-        mutate("IQR (US dollar)" = IQR(pred.2017)) %>%
-        mutate("Q1 (US dollar)" = quantile(pred.2017, 0.25)) %>%
-        mutate("Q3 (US dollar)" = quantile(pred.2017, 0.75)) %>%
+        mutate("Median (US dollars)" = median(pred.2017)) %>%
+        mutate("IQR (US dollars)" = IQR(pred.2017)) %>%
+        mutate("Q1 (US dollars)" = quantile(pred.2017, 0.25)) %>%
+        mutate("Q3 (US dollars)" = quantile(pred.2017, 0.75)) %>%
         dplyr::select(-pred.2017) %>%
         distinct()
     })
