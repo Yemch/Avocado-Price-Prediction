@@ -63,7 +63,7 @@ ui <- dashboardPage(
                         
                         box(title = "Choose price or volumn", status = "warning", solidHeader = F,
                             radioButtons(inputId = "pricevolumn", label = NULL, choices = c("Price"="AveragePrice","Volume"="Total.Volume")), 
-                            selectInput(inputId = "date", label = "Date", choices = unique(avocado$Date), selected = "2015-01-04")
+                            selectInput(inputId = "date", label = "Date", choices = sort(unique(avocado$Date)), selected = "2015-01-04")
                             ) # box
                         
                     ), # fluidRow
@@ -88,8 +88,8 @@ ui <- dashboardPage(
                     
                     fluidRow(
                       box( title = "Model performance statistics", status = "warning", solidHeader = T, width = 6,
-                      p("Mean squared error (MSE) in 2017 training dataset: 0.066"),
-                      p("MSE in 2017 testing dataset: 0.072"),
+                      p("Mean squared error in 2017 training dataset: 0.066"),
+                      p("Mean squared error in 2017 testing dataset: 0.072"),
                       p("Pearson correlation coefficient in 2017 training dataset: 0.834"),
                       p("Pearson correlation coefficient in 2017 testing dataset: 0.818")
                       ), # box
@@ -194,14 +194,12 @@ ui <- dashboardPage(
                     
                     h3("Data Sources"),
                     
-                    p("The avocado volumes and prices data are collected from Kaggle, 
+                    HTML("<p>The avocado volumes and prices data are collected from Kaggle, 
                     which is compiled from the Hass Avocado Board website and includes these variables across various metropolitan areas of the US. 
-                    We can download the data in .csv format directly. 
+                    We can download the data in .csv format directly from <a href = 'https://www.kaggle.com/neuromusic/avocado-prices'>here</a>. 
                     We combine a Food Environment Atlas dataset that includes up to 280 variables related to the food environment and socioeconomic characteristics of all US counties, 
                     which comes from the US Department of Agriculture website. 
-                    The data can be downloaded in .xls format. The following links are the sources of data:"),
-                    p("https://www.kaggle.com/neuromusic/avocado-prices"),
-                    p("https://www.ers.usda.gov/data-products/food-environment-atlas/data-access-and-documentation-downloads/"),
+                    The data can be downloaded in .xls format from <a href='https://www.ers.usda.gov/data-products/food-environment-atlas/data-access-and-documentation-downloads/'>here</a>.</p>"),
 
                     br(),
                     
