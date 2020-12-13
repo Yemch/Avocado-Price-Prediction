@@ -54,14 +54,14 @@ ui <- dashboardPage(
         tabItems(
             # ----- The first page-------
             tabItem(tabName = "basic",
-                    h2("Avocado Prices and Volumns by County"),
+                    h2("Avocado Prices and Volumes by County"),
                     fluidRow(
                         box(title = "Choose a county",  status = "warning", solidHeader = F,
                             selectInput(inputId = "county", label = "County", choices = unique(avocado$County),  selected = "los angeles"),   
                             uiOutput("select")
                             ), # box 
                         
-                        box(title = "Choose price or volumn", status = "warning", solidHeader = F,
+                        box(title = "Choose price or volume", status = "warning", solidHeader = F,
                             radioButtons(inputId = "pricevolumn", label = NULL, choices = c("Price"="AveragePrice","Volume"="Total.Volume")), 
                             selectInput(inputId = "date", label = "Date", choices = sort(unique(avocado$Date)), selected = "2015-01-04")
                             ) # box
@@ -129,7 +129,7 @@ ui <- dashboardPage(
                     
                     fluidRow(
                         box(title = "Input the values of predictors:", status = "warning", solidHeader = T, width = 5,
-                            selectInput("county2",         "County", choices = unique(avocado_2017$County),  selected = "los angeles"),
+                            selectInput("county2",         "County:", choices = unique(avocado_2017$County),  selected = "los angeles"),
                             selectInput("type",            "Type of avocado, conventional or organic:", choices = unique(avocado$type), selected = "conventional"),
                             # The initial values are chosen as median
                             numericInput("totalbags",      "Total number of bags of avocados sold:", value = 21270),
@@ -146,8 +146,8 @@ ui <- dashboardPage(
 
                         box(title = "Output", status = "warning", solidHeader = T,
                             actionButton("button", "Predict Now"),
-                            p("Note: different counties and avocado type would not yield large changes on predicted price.
-                              Try to change total bags of avocado sold or other predictors to see price changing."),
+                            p("Note: County and avocado type will not yield large changes in predicted price.
+                              Try to change the total bags of avocado sold or other predictors to see predicted price changes."),
                             br(), 
                             valueBoxOutput("predvalue", width = 6)
                             
@@ -204,8 +204,16 @@ ui <- dashboardPage(
                     which comes from the US Department of Agriculture website. 
                     The data can be downloaded in .xls format from 
                          <a href='https://www.ers.usda.gov/data-products/food-environment-atlas/data-access-and-documentation-downloads/'>here</a>.</p>"),
-
                     br(),
+                    
+                    h3("Methods"),
+                   
+                    p("We chose Random Forest regression to predict county-level avocado price in 2017. Random Forest is an extension of regression trees, which predict an outcome variable by partitioning the predictor space and estimating the mean (predicted) outcome within each partition. Rather than constructing a single decision tree, Random Forest incorporates repeated sampling with replacement of the data (bootstrapping) to construct multiple decision trees that are averaged across each other. One benefit of Random Forest is its ability to handle large datasets with higher dimensionality. For our purposes, it also injects randomness into the machine learning algorithm to help improve prediction accuracy in the setting of strongly correlated predictors. This methodology improves prediction performance and model stability at the cost of reduced interpretability."), 
+                    
+                    p("We first restricted the avocado volume data to 2017 to maintain temporality between predictor variables captured between 2010-2017 and the outcome of interest. From the 305 potential predictors, we excluded those with > 25% missingness and/or strong collinearity based on subject matter knowledge. There were 2,968 observations and 45 predictors remaining in the dataset, including race percentage, median household income, poverty rate, and total number of avocados sold. After excluding Roanoke and St. Louis counties, there were no missing values across any of the 28 counties."), 
+
+                    p("We randomly split the data into training and testing datasets using a 70:30 ratio, resulting in 2,064 observations and 904 observations, respectively. In the training dataset, we performed Random Forest regression by constructing 500 regression trees and averaging them across each other (see code below for more details). We specified that the model randomly sample 15 variables as candidates at each data partition (number of predictors/3 = 45/3) to reduce correlation between the multiple regression trees. We also required that each terminal node contain at least 100 observations to calculate the mean (predicted) outcome. This algorithm was later applied to the testing dataset to evaluate model performance based on several metrics. We compared the mean squared error (MSE), Pearson correlation coefficients, and the plots of observed against predicted avocado prices in the training and testing datasets. Due to the limited interpretability of Random Forest, the most important predictors across the regression trees were identified by the associated Gini score. This metric is used to evaluate variable importance in Random Forest regression, with a higher score reflecting greater importance of the variable in predicting the outcome."),
+                     br(),
                     
                     h3("References"),
                    

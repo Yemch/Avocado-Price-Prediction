@@ -1,5 +1,5 @@
 ---
-title: "Descriptive analysis(2015-2018) and prediction of avocado prices in the United States in 2017"
+title: "Descriptive analysis (2015-2018) and prediction of avocado prices in the United States in 2017"
 author: "Mingchen Ye, Monica Deng, Nazleen Khan"
 date: "12/12/2020"
 output: html_document
@@ -7,76 +7,108 @@ output: html_document
 
 # Project Introduction
 
-### Overview and Motivation
+## Overview and Motivation
 
-The US demand for avocados has increased substantially since the 1980s (Carman HF, 2018). As a healthy superfood, avocados can be easily incorporated into several meals to meet the requirements for daily intake of fiber, potassium, and monounsaturated fatty acids (Carman HF, 2018). If high demand for avocados leads to more competitive pricing, individuals in certain areas may not be able to incorporate avocados into their diets. Therefore, we propose a US county-level descriptive analysis of avocado prices in comparison with food environment characteristics. 
+The US demand for avocados has increased substantially since the 1980s (Carman HF, 2018). As a healthy superfood, avocados can be easily incorporated into several meals to meet the requirements for daily intake of fiber, potassium, and monounsaturated fatty acids (Carman HF, 2018). If high demand for avocados leads to more competitive pricing, individuals in certain areas may not be able to incorporate avocados into their diets. We propose a US county-level descriptive analysis of avocado prices in comparison with food environment characteristics from 2015 to 2018. 
 
-We also use these and related variables to predict avocado prices across 29 counties in the US with a diverse range of food environments. Our goal is to use this algorithm to predict avocado prices to (1) provide context for area-specific food choices and (2) offer information on locations where avocados may be more reasonably priced.
+We also use these and related variables to predict avocado prices in 2017 across 28 US counties with a diverse range of food environments. Our goal is to use this prediction algorithm to (1) provide context for area-specific food choices and (2) offer information on locations where avocados may be more reasonably priced.
 
-### Project Goal
+Our project will:
 
-Our project will :
+- describe avocado prices and volumes across different US counties and over time (2015-2018).
+- predict avocado prices using variables such as race percentage, median household income, access and proximity to grocery stores, and food purchasing assistance across 28 US counties in 2017.
 
-- describe avocado prices and volumes between different US counties and changes over time (2015-2018).
+## Related Work
 
-- predict avocado prices using variables such as race percentage, median household income, access and proximity to grocery stores, and food purchasing assistance across 29 US counties in 2017.
+We were motivated to investigate this research question based upon our personal consumption patterns of avocados. Since these superfoods are easily incorporated into any meal, we often find limited availability at local grocery stores and substantial variation in prices. An exploratory analysis of county-level price and volume changes over time and factors that may predict cost are imperative to identify food environments where avocados may be more affordable.    
 
-### Data Sources and Data Wrangling
+## Initial Questions
 
-The avocado volumes and prices data are collected from Kaggle, which is compiled from the Hass Avocado Board website and includes these variables across various metropolitan areas of the US. We can download the data in .csv format directly. We combine a Food Environment Atlas dataset that includes up to 280 variables related to the food environment and socioeconomic characteristics of all US counties, which comes from the US Department of Agriculture website. The data can be downloaded in .xls format. The following links are the sources of data:
+The questions we considered in our project include the following:
+
+- How do avocado price and volume change over time across different regions of the US?
+
+We initially intended to answer this question given our personal motivations to understand geographic variation in avocado pricing. However, our dataset only captured avocado price and volume for a limited set of US counties from 2015-2018. Our research question then evolved to investigating changes in avocado price and volume for select counties with a diverse range of food environments and for a specific calendar date range. Additional analyses may be needed to determine whether our results can be extrapolated to other locations and time periods. 
+
+- What are the most important predictors of avocado price across the different locations?
+
+We were interested in evaluating this question to identify locations where avocados may be more reasonably priced. The Food Environment Atlas seemed to provide the most information on likely predictors of avocado price at the county level, such as median household income and proximity to local grocery stores. However, these variables were ranked of lower importance compared to factors such as total bags and numbers of avocados sold. Future studies may seek to incorporate data from other sources to more accurately predict avocado price across the United States.
+
+- Given the limitations of any dataset, what are additional variables that would be useful to incorporate in the machine learning algorithm to improve prediction?
+
+Although the Food Environment Atlas contained information on over 250 variables related to socioeconomic characteristics, these factors had limited predictive ability in the machine learning algorithm. Many of the variables were also strongly correlated such that the number of unique predictors decreased from 280 to 45. Additional variables that were not captured and may be useful to investigate in future iterations of this analysis include avocado brand, source (imported or homegrown), and supply shortages. 
+
+- How transportable is the prediction model for outputting expected avocado prices in (1) different locations and (2) varying time periods outside the range of our data?
+
+Our prediction model was derived using data through 2017, so the results are not expected to apply to avocado prices in 2020 (with the COVID-19 pandemic, preliminary studies suggest that grocery prices have risen sharply due to disruption in the food supply chain). We are also cautious to extrapolate our findings to counties that did not contribute data to the machine learning algorithm. Although our initial goal was to predict avocado price across different regions of the US, we acknowledge the limitations of our data and may pursue additional analyses to evaluate transportability.
+
+## Data 
+
+The avocado volumes and prices data from 2015-2018 are collected from Kaggle, which is compiled from the Hass Avocado Board website and includes these variables across different metropolitan areas of the United States. We downloaded these data in .csv format directly and combined them with a Food Environment Atlas dataset with 280 variables related to the food environment and socioeconomic characteristics of all US counties from 2010-2018 from the US Department of Agriculture website. The data can be downloaded in .xls format. The following links reference the data sources:
 
 https://www.kaggle.com/neuromusic/avocado-prices
 
 https://www.ers.usda.gov/data-products/food-environment-atlas/data-access-and-documentation-downloads/
 
-In the first part of this Rmd, you can find the process of data wrangling.
+The merging of these datasets required us to make assumptions about the geographic unit of interest. The Kaggle dataset included price and volume data on the city or state level, while the Food Environment Atlas captured potential predictors on the county level. To retain the large number of initial predictors, we transformed the city-level data in the Kaggle dataset to the associated county when possible and merged the datasets by this variable. If the Kaggle dataset included (1) state-level information or (2) combined information for two cities that were 30 miles apart or more, we excluded these observations since we would not be able to merge them with the county-level dataset. This led to 29 counties for which we conducted descriptive analyses and 28 counties from which we predicted avocado price. 
 
-### Exploratory Analysis (Analysis 1)
+## Exploratory Analysis
 
-We explore and illustrate the trend of avocado average prices and total volumes over time (2015-2018) by US counties, and compare them across US counties given a time point. The results of this part are on the "Basic" tab on the Shiny app. 
+We conducted several preliminary analyses to explore the Kaggle dataset. As examples, we plotted trends in avocado price and total volume over time (2015-2018) across several US counties using line graphs and specific price and volume amounts for all counties on a given date with bar charts. These analyses were incorporated into the first tab of the Shiny app.
 
-Users can plot changes in average price or total volume of two types of avocados (conventional and organic) across time (2015-2018) for a specific county. 
+Our second goal of the project was to apply a machine learning algorithm to predict avocado prices. We intended to restrict prediction to a single year in the Kaggle dataset since we could not accurately capture year-to-year variation in prices due to inflation or supply shortages with the available predictor variables. The Kaggle dataset only contained data on avocado price for the first few months of 2018, so we used cost and volume information for all available counties in 2017 to derive our prediction model. We restricted to variables in the Food Environment Atlas that were captured between 2010 and 2017 to maintain temporality between potential predictor variables and outcome prediction in 2017.  
 
-The bar plots are designed to show the average price or total volume of two types of avocados (conventional and organic) for all US counties with available data on a specific date.
+Our next challenges were to evaluate missing data and correlation between predictors in the merged dataset. Although we considered multiple imputation to address missingness, variables with missing values affected > 25% of the observations. The pattern of missingness also appeared to be missing not at random (MNAR), which is difficult to address with any empirical approach. We conducted an evaluation of all possible predictors and excluded those that with substantial missingness (> 25% observations). We also did not conduct avocado price prediction for Roanoke or St. Louis counties, as both locations had missingness across several important predictors that were retained in the analysis.
 
-### Price Prediction by Machine Learning: Random Forest (Analysis 2)
+We were initially interested in using least absolute shrinkage and selection operator (LASSO) regression to identify important predictors of interest. However, many of the identified variables were strongly correlated (Pearson correlation coefficient ~ 0.99) such that more complex machine learning methods may be warranted to address this issue. We further pruned our list of potential predictors to 45 variables of interest that were not expected to be strongly correlated; for example, we excluded variables for county-level race and ethnicity in 2010 since these measures were also available for 2015. After finalizing our list, we opted for Random Forest regression to output predicted avocado prices.
+
+## Final Analysis
+
+### Descriptive Analysis (Analysis 1)
+
+We depicted trends in avocado average price and total volume over time (2015-2018) across 29 US counties and compared them between counties for a given date. These results are available in the "Basic" tab of the Shiny app. 
+
+Users can plot changes in average price or total volume of two types of avocados (conventional and organic) across time (2015-2018) for a specific county. The bar plots are designed to show the average price or total volume of two types of avocados (conventional and organic) for the 29 US counties with available data on a specific date.
+
+### Avocado Price Prediction by Machine Learning: Random Forest (Analysis 2)
 
 *Methods*
 
-We chose the random forest algorithm to predict the average avocado price in US counties in 2017. Random forest is an extension of regression trees, which predict an outcome variable by partitioning the predictor space and estimating the mean (predicted) outcome within each data partition. Rather than constructing a single decision tree, random forest incorporates repeated sampling with replacement of the training dataset (bootstrapping) to construct multiple decision trees that are averaged across each other. One of benefits of Random Forest is, the power of handle large data sets with higher dimensionality. It can handle thousands of input variables and identity most significant variables so it is considered as one of the dimensionality reduction method. This approach improves prediction performance and model stability at the cost of reduced interpretability. 
+We chose Random Forest regression to predict county-level avocado price in 2017. Random Forest is an extension of regression trees, which predict an outcome variable by partitioning the predictor space and estimating the mean (predicted) outcome within each partition. Rather than constructing a single decision tree, Random Forest incorporates repeated sampling with replacement of the data (bootstrapping) to construct multiple decision trees that are averaged across each other. One benefit of Random Forest is its ability to handle large datasets with higher dimensionality. For our purposes, it also "injects" randomness into the machine learning algorithm to help improve prediction accuracy in the setting of strongly correlated predictors. This methodology improves prediction performance and model stability at the cost of reduced interpretability. 
 
-We first restricted the data in 2017. From the 305 potential predictors, we excluded those with > 22% missing rate and those with collinearity based on subject matter knowledge. There are 2,968 observations and 46 predictors remaining in the dataset, including race percentage, median household income, poverty rate, total number of avocados sold, population, etc. After that, there were no missing values in 2017. We randomly split it into training and testing datasets by 7:3 ratio, resulting in 2064 observations and 904 observations, respectively. In the training dataset, we performed random forest (see script below for detailed parameter chosen). The model was fit in the testing data set in order to evaluate the model performance. We compared the mean squared error (MSE), Pearson correlation coefficients, and the plots of observed price against predicted price in the training and testing datasets. In addition, the most important predictors were identified by the highest Gini scores, which are used to evaluate variable importance in random forest regression, with a higher score reflecting greater importance of the variable in predicting the outcome. The model performance results were also displayed in the tab “Model Performance” on the shiny app. 
+We first restricted the avocado volume data to 2017 to maintain temporality between predictor variables captured between 2010-2017 and the outcome of interest. From the 305 potential predictors, we excluded those with > 25% missingness and/or strong collinearity based on subject matter knowledge. There were 2,968 observations and 45 predictors remaining in the dataset, including race percentage, median household income, poverty rate, and total number of avocados sold. After excluding Roanoke and St. Louis counties, there were no missing values across any of the 28 counties. 
+
+We randomly split the data into training and testing datasets using a 70:30 ratio, resulting in 2,064 observations and 904 observations, respectively. In the training dataset, we performed Random Forest regression by constructing 500 regression trees and averaging them across each other (see code below for more details). We specified that the model randomly sample 15 variables as candidates at each data partition (number of predictors/3 = 45/3) to reduce correlation between the multiple regression trees. We also required that each terminal node contain at least 100 observations to calculate the mean (predicted) outcome. This algorithm was later applied to the testing dataset to evaluate model performance based on several metrics. We compared the mean squared error (MSE), Pearson correlation coefficients, and the plots of observed against predicted avocado prices in the training and testing datasets. Due to the limited interpretability of Random Forest, the most important predictors across the regression trees were identified by the associated Gini score. This metric is used to evaluate variable importance in Random Forest regression, with a higher score reflecting greater importance of the variable in predicting the outcome.  
 
 *Results*
 
-Since a low MSE (close to 0) and high Pearson correlation coefficient (close to -1 or +1) indicate optimal model performance. The MSE in the test set (0.072) is slightly higher than that in the training set (0.066), which is expected since most prediction models perform optimally in the training datasets upon which they are derived. Due to the small difference in MSE between training and test datasets and methodology of the random forest, there is little concern for overfitting. Overall, the MSE in the test set is small and Pearson correlation coefficient is high (0.818), which suggests that the model performs fairly well in predicting county-level avocado price. The two plots of observed versus predicted avocado prices demonstrate the performance of the random forest model in both training and test sets. The closer the points are to the diagonal line, the better the observed and predicted prices align with each other. In both plots, the points gather around the line. In sum, our model indicates little overfitting and the performance is adequate.
+A low MSE (close to 0) and high Pearson correlation coefficient (close to -1 or +1) indicate optimal model performance. The MSE in the test dataset (0.072) was slightly higher than that in the training set (0.066), which is expected since most prediction models perform optimally in the training datasets from which they are derived. Due to the small difference in MSE between the training and test datasets and methodology of the Random Forest, there is little concern for overfitting. Overall, the MSE in the test dataset is small and Pearson correlation coefficient is high (0.818), which suggests that the model performs fairly well in predicting county-level avocado price. The two plots of observed versus predicted avocado prices demonstrate the performance of the Random Forest model in both training and test datasets. The closer the points are to the diagonal reference line, the better the observed and predicted prices align with each other. In both plots, the points gather around the line. Overall, our prediction model indicates little risk of overfitting and adequate performance in the testing dataset.
 
-
-We rank the top 10 predictors in descending order of Gini score. It indicates that the total number of bags of avocados sold (Total.Bags) is the most important predictor of county-level avocado price in the random forest regression model. The total volume of avocados sold (Total.Volume) and the type of avocado (organic or conventional) come second and third place, respectively.
+We ranked the top 10 predictors in descending order of Gini score. Based on this plot, the total number of bags of avocados sold (Total.Bags) is the most important predictor of county-level avocado price in the Random Forest regression model. The total volume of avocados sold (Total.Volume) and the type of avocado (organic or conventional) came in second and third place, respectively. The model performance results are displayed in the tab “Model Performance” in the Shiny app.
 
 *Limitations*
 
-Our prediction has limitations. First, we only use the data in 2017, so we do not incorporate the calendar time as a predictor. However, avocado prices may change depending on time. Second, given the limited number of US counties from the avocado data, we have limited generalizability of our prediction results to the whole United States. 
+Our prediction algorithm has limitations. We only used data up to and including 2017, so we could not capture yearly or seasonal variation in avocado price as potential predictors. Our predictions may not be generalizable to counties outside of the 28 studied if there are substantial differences in values of the predictor variables. Several variables were excluded due to missingness and/or strong correlation; future studies may incorporate data from several sources with a diverse range of potential predictors to more accurately predict avocado prices across the United States.
 
 ### Shiny App (Analysis 3)
 
-We displayed our main results and visualization on 4 tabs of the Shiny app, including the plots of exploratory analyses, prediction performance, information of important predictors, results of the prediction, and overall information of the project. Moreover, the app is made to be interactive so that the users can set the variables to the values they want and check the results that they are interested in. In this part, we will mainly describe the layouts and functions of the app. Technical details and interpretations have been explained in the previous parts of Analysis 1 and 2.
+We displayed our main results and visualizations in all four tabs of the Shiny app, including the plots of exploratory analyses, prediction performance, information on important predictors, results of the prediction, and overall project information. Moreover, the app is made to be interactive so that the users can input values for the most important predictors and check the results. In this part, we will mainly describe the layouts and functions of the app. Technical details and interpretations have been explained in the previous parts of Analysis 1 and 2.
 
 The first tab of the Shiny app focuses on descriptive analyses, including basic plots of average prices and total volumes of avocados by US county. 
 
-The second tab contains information on the performance of the random forest regression model used to predict avocado prices across 29 US counties with county-level data in 2017.  The tab also presents the distribution of the top 10 most important variables used for avocado price prediction based on the associated Gini scores. The box on the top left illustrates the performance statistics of the random forest model, including the mean squared error (MSE) and Pearson correlation coefficient between observed and predicted avocado prices in both training and test datasets. The plot "Top 10 Important Predictors Identified by Random Forest" ranks the top 10 predictors in descending order of Gini score. Below that, there are the two plots of observed versus predicted avocado prices in both training and test sets. At the bottom, users can select a variable among the top 10 important predictors and the associated table outputs basic information on the selected variable. The plot on the right-hand side shows the density plot of the predictor.
+The second tab contains information on the performance of the Random Forest regression model used to predict avocado prices across 28 US counties with county-level data in 2017. The tab also presents the distribution of the top 10 most important variables used for avocado price prediction based on the associated Gini scores. The box on the top left illustrates the performance statistics of the Random Forest model, including the MSE and Pearson correlation coefficient between observed and predicted avocado prices in both training and test datasets. The plot "Top 10 Important Predictors Identified by Random Forest" ranks the top 10 predictors in descending order of Gini score. Below that, there are the two plots of observed versus predicted avocado prices in both training and test datasets. At the bottom, users can select a variable among the top 10 important predictors, and the associated table outputs basic information on the selected variable. The plot on the right-hand side shows the density plot of the predictor.
 
-The third tab applies the results of the random forest regression model to US county-level avocado price prediction. Users can input the values of the top 10 most important predictors (other predictors were set to median values in the code) and press the button "Predict Now", which outputs the predicted price for one avocado in the blue box. Below the blue box, users can select up to 6 counties. The box plot for each county shows the distribution of predicted avocado price, which can help users identify locations where avocados may be more affordable on average. Additional information is printed below the box plots, such as the associated state for each county, median predicted avocado price, and interquartile range of predicted avocado price.
+The third tab applies the results of the Random Forest regression model to US county-level avocado price prediction. Users can input the values of the top 10 most important predictors (other predictors were set to median values in the code) and press the button "Predict Now", which outputs the predicted price for one avocado in the blue box. Below the blue box, users can select up to six counties. The box plot for each county shows the distribution of predicted avocado price, which can help users identify locations where avocados may be more affordable on average. Additional information is printed below the box plots, such as the associated state for each county, median predicted avocado price, and interquartile range of predicted avocado price.
 
-The fourth tab contains overall information of this prediction project, including background and motivation, data sources, and key references.
+The fourth tab contains overall information on the project, including background and motivation, data sources, and key references.
 
-### Websites
+## Websites
 
-Project website: **The google site**
+Project website: https://sites.google.com/view/avocadopriceprediction/home
 
 GitHub repository: https://github.com/Yemch/Avocado-Price-Prediction
 
-### References:
+## References:
 
 Carman HF. (2018). The story behind avocados’ rise to prominence in the United States. Giannini Foundation of Agricultural Economics, University of California. Accessed 11/01/2020 at https://s.giannini.ucop.edu/uploads/giannini_public/5c/1f/5c1fa9d0-c5c9-45ce-8606-149ddf4f7397/v22n5_3.pdf.
 
@@ -104,7 +136,7 @@ library(purrr)
 
 # 1. Avocado Prices Data Cleaning
 Historical data on avocado prices and sales volume in multiple US markets.
-This data contains the outcome - the average price of a single avocado. The prices are summerised at city-level.
+This data contains the outcome - the average price of a single avocado. The prices are summarized at the city level.
 Source: https://www.kaggle.com/neuromusic/avocado-prices
 
 Some relevant columns in the dataset:
@@ -138,7 +170,7 @@ head(avocado)
 summary(avocado)
 ```
 
-Keep data with regions at city-level. For regions of combination of two cities such as "BaltimoreWashington", we exclude if two cities have distance greater than 30 miles, because we assume that cities with equal or closer distance of 30 miles have the same avocado prices.
+Keep data with regions at the city level. For regions of combination of two cities such as "BaltimoreWashington", we exclude if two cities have distance greater than 30 miles, because we assume that cities with equal or closer distance of 30 miles have the same avocado prices.
 ```{r}
 # Check all the combined cities left
 city2county %>% 
@@ -237,7 +269,6 @@ write.csv(avocado,"./avocado_clean.csv", row.names = F)
 
 # Price Prediction by Machine Learing: Random Forest
 
-
 ## Loading necessary packages
 ```{r}
 library(tidyverse)
@@ -249,8 +280,6 @@ library(MASS)
 library(knitr)
 library(caTools)
 ```
-
-## Extending inference to whole United States in 2017
 
 ## Pulling in the wrangled data and creating the training and testing datasets
 ```{r}
@@ -284,7 +313,8 @@ test = subset(avocado_2017, sample == FALSE)
 ## Assessing the missingness
 ```{r}
 ## TRAINING DATASET 
-sapply(train, function(x) sum(is.na(x))) # Number missing by column
+sapply(train, function(x) sum(is.na(x))) 
+# Number missing by column
 sum(is.na(train)) 
 # 0 missing observations in training dataset
 
@@ -299,19 +329,19 @@ xTest <- test %>% dplyr::select(-AveragePrice)
 ```{r}
 set.seed(1500)  
 train.model.us <- randomForest(AveragePrice ~ ., data = train, mtry = 15, nodesize = 100) 
-# p/3 = 46 predictors/3 = 15 variables tried at each split
+# p/3 = 45 predictors/3 = 15 variables tried at each split
 # mtry reduces correlation between trees and improves accuracy
 # nodesize refers to the minimum number of observations at each split
 train.model.us
 ```
 
-## Evaluating the random forest performance in training and testing datasets
+## Evaluating random forest performance in training and testing datasets
 ```{r}
 pred.train = predict(train.model.us, newdata = train)
 head(pred.train)
 train %>% ggplot() +
           geom_point(aes(x = pred.train, y = AveragePrice), color = "green") +
-          geom_abline(slope = 1, intercept = 0) + 
+          geom_abline(slope = 1) + 
           scale_x_continuous(breaks = seq(0, 2.50, 0.25)) + 
           scale_y_continuous(breaks = seq(0, 3.25, 0.25)) + 
           xlab("Predicted avocado price in the US 2017 training data (US dollars)") + 
@@ -328,7 +358,7 @@ pred.test = predict(train.model.us, newdata = xTest)
 head(pred.test)
 xTest %>% ggplot() +
           geom_point(aes(x = pred.test, y = test$AveragePrice), color = "orange") +
-          geom_abline(slope = 1, intercept = 0) + 
+          geom_abline(slope = 1) + 
           scale_x_continuous(breaks = seq(0, 2.50, 0.25)) + 
           scale_y_continuous(breaks = seq(0, 3.25, 0.25)) + 
           xlab("Predicted avocado price in the US 2017 testing data (US dollars)") + 
@@ -357,8 +387,7 @@ tmp %>% filter(Gini > 4.68) %>%
         theme(axis.text = element_text(size = 8))
 ```
 
-## Range of avocado price predictions in the US in 2017 by county
-
+## Distributions of avocado price predictions in the US in 2017 by county
 ```{r}
 avocado_2017_full <- avocado_clean %>%
                      filter(year == 2017 & County != "roanoke" & County != "stlouis") %>% 
