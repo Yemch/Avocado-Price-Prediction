@@ -60,7 +60,7 @@ Our prediction has limitations. First, we only use the data in 2017, so we do no
 
 ### Shiny App (Analysis 3)
 
-We displayed the visualization of exploratory analyses, performance of the prediction model, information of important predictors, results of the prediction, and overall information of the project on 4 tabs of the Shiny app. Moreover, the app is made to be interactive so that the users can set the variables to the values they want and check the results that they are interested in. In this part, we will mainly describe the layouts and functions of the app. Technical details and interpretations have been explained in the previous parts of Analysis 1 and 2.
+We displayed our main results and visualization on 4 tabs of the Shiny app, including the plots of exploratory analyses, prediction performance, information of important predictors, results of the prediction, and overall information of the project. Moreover, the app is made to be interactive so that the users can set the variables to the values they want and check the results that they are interested in. In this part, we will mainly describe the layouts and functions of the app. Technical details and interpretations have been explained in the previous parts of Analysis 1 and 2.
 
 The first tab of the Shiny app focuses on descriptive analyses, including basic plots of average prices and total volumes of avocados by US county. 
 
