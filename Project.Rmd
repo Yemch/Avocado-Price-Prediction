@@ -11,7 +11,7 @@ output: html_document
 
 The US demand for avocados has increased substantially since the 1980s (Carman HF, 2018). As a healthy superfood, avocados can be easily incorporated into several meals to meet the requirements for daily intake of fiber, potassium, and monounsaturated fatty acids (Carman HF, 2018). If high demand for avocados leads to more competitive pricing, individuals in certain areas may not be able to incorporate avocados into their diets. We propose a US county-level descriptive analysis of avocado prices in comparison with food environment characteristics from 2015 to 2018. 
 
-We also use these and related variables to predict avocado prices in 2017 across 28 US counties with a diverse range of food environments. Our goal is to use this prediction algorithm to (1) provide context for area-specific food choices and (2) offer information on locations where avocados may be more reasonably priced.
+We also use these and related variables to predict avocado prices in 2017 across 28 US counties with a diverse range of food environments. Our goal is to use Random Forest algorithm to (1) provide context for area-specific food choices and (2) offer information on locations where avocados may be more reasonably priced.
 
 Our project will:
 
@@ -50,7 +50,7 @@ https://www.kaggle.com/neuromusic/avocado-prices
 
 https://www.ers.usda.gov/data-products/food-environment-atlas/data-access-and-documentation-downloads/
 
-The merging of these datasets required us to make assumptions about the geographic unit of interest. The Kaggle dataset included price and volume data on the city or state level, while the Food Environment Atlas captured potential predictors on the county level. To retain the large number of initial predictors, we transformed the city-level data in the Kaggle dataset to the associated county when possible and merged the datasets by this variable. If the Kaggle dataset included (1) state-level information or (2) combined information for two cities that were 30 miles apart or more, we excluded these observations since we would not be able to merge them with the county-level dataset. This led to 29 counties for which we conducted descriptive analyses and 28 counties from which we predicted avocado price. 
+The merging of these datasets required us to make assumptions about the geographic unit of interest. The Kaggle dataset included price and volume data on the city or state level, while the Food Environment Atlas captured potential predictors on the county level. To retain the large number of initial predictors, we transformed the city-level data in the Kaggle dataset to the associated county when possible and merged the datasets by this variable. If the Kaggle dataset included (1) state-level information or (2) combined information for two cities that were 30 miles apart or more, we excluded these observations since we would not be able to merge them with the county-level dataset. This led to 28 counties for which we conducted descriptive analyses and 28 counties from which we predicted avocado price. 
 
 ## Exploratory Analysis
 
@@ -66,9 +66,9 @@ We were initially interested in using least absolute shrinkage and selection ope
 
 ### Descriptive Analysis (Analysis 1)
 
-We depicted trends in avocado average price and total volume over time (2015-2018) across 29 US counties and compared them between counties for a given date. These results are available in the "Basic" tab of the Shiny app. 
+We depicted trends in avocado average price and total volume over time (2015-2018) across 28 US counties and compared them between counties for a given date. These results are available in the "Basic" tab of the Shiny app. 
 
-Users can plot changes in average price or total volume of two types of avocados (conventional and organic) across time (2015-2018) for a specific county. The bar plots are designed to show the average price or total volume of two types of avocados (conventional and organic) for the 29 US counties with available data on a specific date.
+Users can plot changes in average price or total volume of two types of avocados (conventional and organic) across time (2015-2018) for a specific county. The bar plots are designed to show the average price or total volume of two types of avocados (conventional and organic) for the 28 US counties with available data on a specific date.
 
 ### Avocado Price Prediction by Machine Learning: Random Forest (Analysis 2)
 
@@ -88,7 +88,7 @@ We ranked the top 10 predictors in descending order of Gini score. Based on this
 
 *Limitations*
 
-Our prediction algorithm has limitations. We only used data up to and including 2017, so we could not capture yearly or seasonal variation in avocado price as potential predictors. Our predictions may not be generalizable to counties outside of the 28 studied if there are substantial differences in values of the predictor variables. Several variables were excluded due to missingness and/or strong correlation; future studies may incorporate data from several sources with a diverse range of potential predictors to more accurately predict avocado prices across the United States.
+Our prediction algorithm has limitations. We only used data up to and including 2017, so we could not capture yearly or seasonal variation in avocado price as potential predictors. Our predictions may not be generalizable to counties outside of the 28 studied if they have different characteristics compared with these 28 counties. Several variables were excluded due to missingness and/or strong correlation; future studies may incorporate data from several sources with a diverse range of potential predictors to more accurately predict avocado prices across the United States.
 
 ### Shiny App (Analysis 3)
 
