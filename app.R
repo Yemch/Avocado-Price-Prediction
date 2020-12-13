@@ -129,7 +129,7 @@ ui <- dashboardPage(
                     
                     fluidRow(
                         box(title = "Input the values of predictors:", status = "warning", solidHeader = T, width = 5,
-                            selectInput("county2",         "County", choices = unique(avocado$County),  selected = "los angeles"),
+                            selectInput("county2",         "County", choices = unique(avocado_2017$County),  selected = "los angeles"),
                             selectInput("type",            "Type of avocado, conventional or organic:", choices = unique(avocado$type), selected = "conventional"),
                             # The initial values are chosen as median
                             numericInput("totalbags",      "Total number of bags of avocados sold:", value = 21270),
@@ -146,7 +146,9 @@ ui <- dashboardPage(
 
                         box(title = "Output", status = "warning", solidHeader = T,
                             actionButton("button", "Predict Now"),
-                            br(), br(), br(), br(),
+                            p("Note: different counties and avocado type would not yield large changes on predicted price.
+                              Try to change total bags of avocado sold or other predictors to see price changing."),
+                            br(), 
                             valueBoxOutput("predvalue", width = 6)
                             
                         ), # box 
