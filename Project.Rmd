@@ -267,7 +267,7 @@ write.csv(avocado,"./avocado_clean.csv", row.names = F)
 
 -------------
 
-# Price Prediction by Machine Learing: Random Forest
+# Price Prediction by Machine Learning: Random Forest
 
 ## Loading necessary packages
 ```{r}
