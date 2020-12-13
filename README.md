@@ -2,9 +2,9 @@
 
 Authors: Group 6 - Mingchen Ye, Monica Deng, Nazleen Khan
 
-Our website can be found [here]().
+Our website can be found [here](https://sites.google.com/view/avocadopriceprediction/home).
 
-Our screencast can be found [here]().
+Our screencast can be found [here](https://youtu.be/6C_0NpOehkU).
 
 ### Goal of this project
 
