@@ -44,9 +44,10 @@ train = subset(avocado_2017, sample == TRUE)
 test = subset(avocado_2017, sample == FALSE) 
 # Randomly split 2017 data into 70:30 training and testing datasets
 
-## Asessing missing data
+## Assessing missing data
 ## TRAINING DATASET 
-sapply(train, function(x) sum(is.na(x))) # Number missing by column
+sapply(train, function(x) sum(is.na(x))) 
+# Number missing by column
 sum(is.na(train)) 
 # 0 missing observations in training dataset
 
