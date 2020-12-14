@@ -100,7 +100,7 @@ The second tab contains information on the performance of the Random Forest regr
 
 The third tab applies the results of the Random Forest regression model to US county-level avocado price prediction. Users can input the values of the top 10 most important predictors (other predictors were set to median values in the code) and press the button "Predict Now", which outputs the predicted price for one avocado in the blue box. Below the blue box, users can select up to six counties. The box plot for each county shows the distribution of predicted avocado price, which can help users identify locations where avocados may be more affordable on average. Additional information is printed below the box plots, such as the associated state for each county, median predicted avocado price, and interquartile range of predicted avocado price.
 
-The fourth tab contains overall information on the project, including background and motivation, data sources, and key references.
+The fourth tab contains overall information on the project, including background and motivation, data sources, methods, and key references.
 
 ## Websites
 

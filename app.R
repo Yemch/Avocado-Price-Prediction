@@ -1,7 +1,6 @@
 library(ggplot2)
 library(dplyr)
 library(viridis)
-library(maps)
 library(shiny)
 library(shinydashboard)
 
