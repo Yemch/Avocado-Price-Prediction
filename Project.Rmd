@@ -108,6 +108,8 @@ Project website: https://sites.google.com/view/avocadopriceprediction/home
 
 GitHub repository: https://github.com/Yemch/Avocado-Price-Prediction
 
+Screencast: https://youtu.be/6C_0NpOehkU
+
 ## References:
 
 Carman HF. (2018). The story behind avocados’ rise to prominence in the United States. Giannini Foundation of Agricultural Economics, University of California. Accessed 11/01/2020 at https://s.giannini.ucop.edu/uploads/giannini_public/5c/1f/5c1fa9d0-c5c9-45ce-8606-149ddf4f7397/v22n5_3.pdf.
