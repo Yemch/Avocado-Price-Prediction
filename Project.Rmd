@@ -76,7 +76,7 @@ Users can plot changes in average price or total volume of two types of avocados
 
 We chose Random Forest regression to predict county-level avocado price in 2017. Random Forest is an extension of regression trees, which predict an outcome variable by partitioning the predictor space and estimating the mean (predicted) outcome within each partition. Rather than constructing a single decision tree, Random Forest incorporates repeated sampling with replacement of the data (bootstrapping) to construct multiple decision trees that are averaged across each other. One benefit of Random Forest is its ability to handle large datasets with higher dimensionality. For our purposes, it also "injects" randomness into the machine learning algorithm to help improve prediction accuracy in the setting of strongly correlated predictors. This methodology improves prediction performance and model stability at the cost of reduced interpretability. 
 
-We first restricted the avocado volume data to 2017 to maintain temporality between predictor variables captured between 2010-2017 and the outcome of interest. From the 305 potential predictors, we excluded those with > 25% missingness and/or strong collinearity based on subject matter knowledge. There were 2,968 observations and 45 predictors remaining in the dataset, including race percentage, median household income, poverty rate, and total number of avocados sold. After excluding Roanoke and St. Louis counties, there were no missing values across any of the 28 counties. 
+We first restricted the avocado volume data to 2017 to maintain temporality between predictor variables captured between 2010-2017 and the outcome of interest. From the 305 potential predictors, we excluded those with > 25% missingness and/or strong collinearity based on subject matter knowledge. There were 2,968 observations and 45 predictors remaining in the dataset, including race percentage, median household income, poverty rate, and total number of avocados sold, etc. After excluding Roanoke and St. Louis counties, there were no missing values across any of the 28 counties. 
 
 We randomly split the data into training and testing datasets using a 70:30 ratio, resulting in 2,064 observations and 904 observations, respectively. In the training dataset, we performed Random Forest regression by constructing 500 regression trees and averaging them across each other (see code below for more details). We specified that the model randomly sample 15 variables as candidates at each data partition (number of predictors/3 = 45/3) to reduce correlation between the multiple regression trees. We also required that each terminal node contain at least 100 observations to calculate the mean (predicted) outcome. This algorithm was later applied to the testing dataset to evaluate model performance based on several metrics. We compared the mean squared error (MSE), Pearson correlation coefficients, and the plots of observed against predicted avocado prices in the training and testing datasets. Due to the limited interpretability of Random Forest, the most important predictors across the regression trees were identified by the associated Gini score. This metric is used to evaluate variable importance in Random Forest regression, with a higher score reflecting greater importance of the variable in predicting the outcome.  
 
@@ -84,7 +84,7 @@ We randomly split the data into training and testing datasets using a 70:30 rati
 
 A low MSE (close to 0) and high Pearson correlation coefficient (close to -1 or +1) indicate optimal model performance. The MSE in the test dataset (0.072) was slightly higher than that in the training set (0.066), which is expected since most prediction models perform optimally in the training datasets from which they are derived. Due to the small difference in MSE between the training and test datasets and methodology of the Random Forest, there is little concern for overfitting. Overall, the MSE in the test dataset is small and Pearson correlation coefficient is high (0.818), which suggests that the model performs fairly well in predicting county-level avocado price. The two plots of observed versus predicted avocado prices demonstrate the performance of the Random Forest model in both training and test datasets. The closer the points are to the diagonal reference line, the better the observed and predicted prices align with each other. In both plots, the points gather around the line. Overall, our prediction model indicates little risk of overfitting and adequate performance in the testing dataset.
 
-We ranked the top 10 predictors in descending order of Gini score. Based on this plot, the total number of bags of avocados sold (Total.Bags) is the most important predictor of county-level avocado price in the Random Forest regression model. The total volume of avocados sold (Total.Volume) and the type of avocado (organic or conventional) came in second and third place, respectively. The model performance results are displayed in the tab “Model Performance” in the Shiny app.
+We ranked the top 10 predictors in descending order of Gini scores. Based on this plot, the total number of bags of avocados sold (Total.Bags) is the most important predictor of county-level avocado price in the Random Forest regression model. The total volume of avocados sold (Total.Volume) and the type of avocado (organic or conventional) came in second and third place, respectively. The model performance results are displayed in the tab “Model Performance” in the Shiny app.
 
 *Limitations*
 
@@ -127,7 +127,7 @@ US Department of Agriculture. (2020). US avocado demand is climbing steadily. Ac
 
 # Data Wrangling
 
-This part is for the data wrangling process. We first cleaned the `avocado.csv` with unclear region descriptions and restricted the data only at city level. Since avocado prices data is mainly at city level and the Food Environment Atlas datasets are at county level, we created a new dataset `Cities-Counties-States.xlsx` mannually for linking the cities to counties. After that, we merged prices data and food environment data together by the same county in the same state. Finally, a cleaned version of data is outputed as `avocado_clean.csv`.
+This part is for the data wrangling process. We first cleaned the `avocado.csv` with unclear region descriptions and restricted the data only at city level. Since avocado prices data is mainly at city level and the Food Environment Atlas datasets are at county level, we created a new dataset `Cities-Counties-States.xlsx` manually for linking the cities to counties. After that, we merged prices data and food environment data together by the same county in the same state. Finally, a cleaned version of data is outputted as `avocado_clean.csv` for downstream analyses.
 
 
 ```{r}
@@ -136,7 +136,7 @@ library(readxl)
 library(purrr)
 ```
 
-# 1. Avocado Prices Data Cleaning
+### 1. Avocado Prices Data Cleaning
 Historical data on avocado prices and sales volume in multiple US markets.
 This data contains the outcome - the average price of a single avocado. The prices are summarized at the city level.
 Source: https://www.kaggle.com/neuromusic/avocado-prices
@@ -206,11 +206,11 @@ avocado = avocado %>%
 
 ```
 
-# 2. Food Environment Atlas Data Cleaning
+### 2. Food Environment Atlas Data Cleaning
 
-These data are the potential predictors we will be used to predict avocado prices.
+These data are the potential predictors to be used in prediction analysis.
 
-Read food environment atlas data. 
+Load food environment atlas data. 
 ```{r}
 county = read_xlsx("./FoodAtlasData/County.xlsx")
 state = read_xlsx("./FoodAtlasData/State.xlsx")
@@ -246,7 +246,7 @@ foodatlas = foodatlas %>%
                 -County.x.x, -County.x.x.x, -County.x.x.x.x, -County.x.x.x.x.x, -County.x, -County.y.y, -County.y.y.y, -County.y.y.y.y, -County.y.y.y.y.y)
 ```
 
-# 3. Merge two parts together
+### 3. Merge two parts together
 ```{r}
 # Capitalize all the Counties and States in food environment atlas data
 foodatlas$State.x = toupper(foodatlas$State.x)
@@ -260,6 +260,7 @@ avocado$County = tolower(avocado$County)
 dim(avocado)
 ```
 
+Output a cleaned version of avocado data:
 ```{r}
 write.csv(avocado,"./avocado_clean.csv", row.names = F)
 ```
