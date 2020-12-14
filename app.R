@@ -20,7 +20,7 @@ top10_predictor = avocado[c("Total.Bags", "Total.Volume",
                                  "SPECSPTH16","GROCPTH16",
                                  "MEDHHINC15","PC_FSRSALES12")]
 
-# Define UI for application that draws a histogram
+
 ui <- dashboardPage(
     
     skin = "black",
@@ -30,7 +30,7 @@ ui <- dashboardPage(
     
     dashboardHeader(
         title = "Avocado Price",
-        dropdownMenu()  # dropdownMenu
+        dropdownMenu()  
         
         
         ), # dashboardHeader
@@ -51,9 +51,11 @@ ui <- dashboardPage(
     
     dashboardBody(
         tabItems(
+            
             # ----- The first page-------
             tabItem(tabName = "basic",
                     h2("Avocado Prices and Volumes by County"),
+                    
                     fluidRow(
                         box(title = "Choose a county",  status = "warning", solidHeader = F,
                             selectInput(inputId = "county", label = "County", choices = unique(avocado$County),  selected = "los angeles"),   
@@ -126,6 +128,7 @@ ui <- dashboardPage(
             tabItem(tabName = "prediction",
                     h2("Avocado Price Prediction"),
                     
+                    # Default values are set to medians
                     fluidRow(
                         box(title = "Input the values of predictors:", status = "warning", solidHeader = T, width = 5,
                             selectInput("county2",         "County:", choices = unique(avocado_2017$County),  selected = "los angeles"),
@@ -142,7 +145,6 @@ ui <- dashboardPage(
                             numericInput("PC_FSRSALES12",  "Expenditures per capita, restaurants, (US dollars):", value = 722.6)
                         ), # box 
                         
-
                         box(title = "Output", status = "warning", solidHeader = T,
                             actionButton("button", "Predict Now"),
                             p("Note: County and avocado type will not yield large changes in predicted price.
@@ -212,7 +214,8 @@ ui <- dashboardPage(
                     p("We first restricted the avocado volume data to 2017 to maintain temporality between predictor variables captured between 2010-2017 and the outcome of interest. From the 305 potential predictors, we excluded those with > 25% missingness and/or strong collinearity based on subject matter knowledge. There were 2,968 observations and 45 predictors remaining in the dataset, including race percentage, median household income, poverty rate, and total number of avocados sold. After excluding Roanoke and St. Louis counties, there were no missing values across any of the 28 counties."), 
 
                     p("We randomly split the data into training and testing datasets using a 70:30 ratio, resulting in 2,064 observations and 904 observations, respectively. In the training dataset, we performed Random Forest regression by constructing 500 regression trees and averaging them across each other (see code below for more details). We specified that the model randomly sample 15 variables as candidates at each data partition (number of predictors/3 = 45/3) to reduce correlation between the multiple regression trees. We also required that each terminal node contain at least 100 observations to calculate the mean (predicted) outcome. This algorithm was later applied to the testing dataset to evaluate model performance based on several metrics. We compared the mean squared error (MSE), Pearson correlation coefficients, and the plots of observed against predicted avocado prices in the training and testing datasets. Due to the limited interpretability of Random Forest, the most important predictors across the regression trees were identified by the associated Gini score. This metric is used to evaluate variable importance in Random Forest regression, with a higher score reflecting greater importance of the variable in predicting the outcome."),
-                     br(),
+                    
+                    br(),
                     
                     h3("References"),
                    
@@ -257,7 +260,7 @@ server <- function(input, output) {
         else{ylimit_con = 5500000}
     })
     
-    ##price/volume over time group by county  (line plot)
+    # price/volume over time group by county (line plots)
     output$line_org <- renderPlot({
         
     avocado %>% filter( County %in% input$county & type == "organic") %>%  
@@ -282,7 +285,7 @@ server <- function(input, output) {
             labs(title = paste(title(),"(Conventional) Over Time"), y=plot_y())
     }) 
   
-    #volume/price in different counties at a certain time point (barplot)
+    # volume/price in different counties at a certain time point (barplots)
     output$bar_org <- renderPlot({
     
     avocado = avocado %>% filter(Date %in% as.Date(input$date, format = "%Y-%m-%d")) %>% filter(type == "organic")
@@ -314,8 +317,9 @@ server <- function(input, output) {
             labs(title=paste(title(),"(Conventional) on", input$date), y=plot_y())
     })
     
-    ### Tab 2 - predictors characteristics
+    ### Tab 2 - Model performance
     
+    # 10 predictors with highest Gini scores
     output$gini = renderPlot({
       tmp %>% filter(Gini > 4.68) %>%
         ggplot(aes(x = reorder(feature, Gini), y = Gini, fill=Gini)) +
@@ -335,7 +339,8 @@ server <- function(input, output) {
                                            "MEDHHINC15"="Median household income (2015)",
                                             "PC_FSRSALES12"="Restaurants expenditures per capita (2012)"))
     })
-      
+    
+    # Observed vs predicted values in the training data  
     output$train = renderPlot({
       train %>% ggplot() +
         geom_point(aes(x = pred.train, y = AveragePrice), color = "darkolivegreen3") +
@@ -347,6 +352,7 @@ server <- function(input, output) {
         ggtitle("Observed Versus Predicted Avocado Prices in the US 2017 Training Data")
     })
     
+    # Observed vs predicted values in the testing data 
     output$test = renderPlot({
       xTest %>% ggplot() +
         geom_point(aes(x = pred.test, y = test$AveragePrice), color = "goldenrod1") +
@@ -358,11 +364,12 @@ server <- function(input, output) {
         ggtitle("Observed Versus Predicted Avocado Prices in the US 2017 Testing Data")
     })
     
+    # A table output the description of selected table
     output$description = renderTable({
       codebook %>% filter(Variable %in% input$vars)
     })
     
-
+    # Density of the selected predictor
     output$hist = renderPlot({
       top10_predictor %>%
         ggplot(aes_string(x=input$vars)) + 
@@ -373,7 +380,7 @@ server <- function(input, output) {
     
     ### Tab 3 - Prediction using users input values
     
-    # Make a dataframe for users input 
+    # Make a dataframe for users input, but active when user click the button
 
     users.input = eventReactive(
         input$button, { data.frame(
@@ -396,10 +403,12 @@ server <- function(input, output) {
                              
                              ) }) # eventReactive
     
+    # Output predicted value
     output$predvalue = renderValueBox({ valueBox(subtitle = "dollars for one avocado", icon = icon("dollar-sign"),
-                                                 value = round(  predict(train.model.us, newdata = users.input())[[1]] , 4 ) ) # valueBox 
+                                                 value = round(predict(train.model.us, newdata = users.input())[[1]], 4)) # valueBox 
       }) # renderValueBox
     
+    # The table reporting median, IQR, Q1 and Q3
     output$state = renderTable({
       avocado_2017_full %>% 
         filter(County %in% input$county3) %>% 
@@ -413,6 +422,7 @@ server <- function(input, output) {
         distinct()
     })
     
+    # The box plot for predicted price in different counties
     output$box = renderPlot({
       avocado_2017_full %>% 
         filter(County %in% input$county3) %>%
